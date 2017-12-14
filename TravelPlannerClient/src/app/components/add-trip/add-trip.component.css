@@ -1,0 +1,14 @@
+
+#map {
+  min-height: 500px;
+  height: 100%;
+  width: 100%;
+}
+
+
+#title {
+  font-size: 25px;
+  font-weight: 500;
+  padding: 6px 22px;
+  font-weight: bold;
+}

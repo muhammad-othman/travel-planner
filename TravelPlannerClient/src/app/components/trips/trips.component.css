@@ -1,0 +1,15 @@
+
+.btn{
+    margin: 0px;
+    padding: 6px 12px;
+}
+    .flex-center-vertically {
+        font-size: 20px;
+        margin-top: 7px;
+        color: rgb(241, 18, 18)
+      }
+
+
+.control-label{
+    padding:7px 10px;
+}

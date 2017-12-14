@@ -1,0 +1,31 @@
+<div class='row'>
+    <h5 id="title" class='center'>Next Month Plane</h5>
+    <br>
+    <div class="col-sm-offset-1 col-sm-10">
+        <div id="map"></div>
+      </div>
+    <div class="col-sm-12 col-md-offset-1 col-md-10">
+      <ngb-pagination [collectionSize]="totalItems" [pageSize]="10" [(page)]="pageIndex" [maxSize]="10" [rotate]="true" (pageChange)="getTrips()"></ngb-pagination>
+      <table id="tripstable" class="table table-striped">
+        <thead>
+          <tr class="table-head">
+            <th class="col-md-2">Destination</th>
+            <th class="col-md-1">Start Date</th>
+            <th class="col-md-1">End Date</th>
+            <th class="col-md-4">Sightseeings</th>
+            <th class="col-md-3">Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let trip of trips">
+            <td>{{trip.destination}}</td>
+            <td>{{trip.startDate}}</td>
+            <td>{{trip.endDate}}</td>
+            <td>{{trip.sights}}</td>
+            <td>{{trip.comment}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  

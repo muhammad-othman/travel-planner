@@ -1,0 +1,65 @@
+<div class='row'>
+    <div class="col-sm-12 col-md-offset-1 col-md-10">
+      <div class='row col-sm-12'>
+        <br>
+        <div class="form-group col-sm-2">
+          <label for="forDate" class="col-sm-3 control-label">From</label>
+          <div class="col-sm-9">
+            <input class="form-control" type="text" id="datepicker">
+          </div>
+        </div>
+        <div class="form-group col-sm-2">
+          <label for="forDate" class="col-sm-1 control-label">To</label>
+          <div class="col-sm-10">
+            <input class="form-control" type="text" id="datepicker2">
+          </div>
+        </div>
+        <div class="form-group col-sm-3">
+          <label for="forDate" class="col-sm-4 control-label">Destination</label>
+          <div class="col-sm-8">
+            <input class="form-control" [(ngModel)]="destination" type="text">
+          </div>
+        </div>
+        <div>
+          <div class="col-sm-2">
+            <button type="button" class="btn btn-info" (click)="filterTrips()">Filter Trips</button>
+            <button type="button" class="btn btn-default" (click)="reset()">Reset</button>
+          </div>
+        </div>
+      </div>
+      <ngb-pagination [collectionSize]="totalItems" [pageSize]="10" [(page)]="pageIndex" [maxSize]="10" [rotate]="true" (pageChange)="getTrips()"></ngb-pagination>
+      <table id="tripstable" class="table table-striped">
+        <thead>
+          <tr class="table-head">
+            <th class="col-md-2">Destination</th>
+            <th class="col-md-1">Start Date</th>
+            <th class="col-md-1">End Date</th>
+            <th class="col-md-1">Counter</th>
+            <th class="col-md-2">Sightseeings</th>
+            <th class="col-md-2">Comment</th>
+            <th class="col-md-2">User</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let trip of trips">
+            <td>{{trip.destination}}</td>
+            <td>{{trip.startDate}}</td>
+            <td>{{trip.endDate}}</td>
+            <td>{{trip.counter}}</td>
+            <td>{{trip.sights}}</td>
+            <td>{{trip.comment}}</td>
+            <td>{{trip.userEmail}}</td>
+  
+            <td>
+              <button type="button" class="btn btn-primary" (click)="updateTrip(trip.id)">Update</button>
+            </td>
+            <td>
+              <span class="glyphicon glyphicon-remove flex-center-vertically" (click)="deleteTrip(trip.id)"> </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+  </div>
+  

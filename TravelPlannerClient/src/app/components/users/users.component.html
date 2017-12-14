@@ -1,0 +1,57 @@
+<div class='row'>
+    <div class="col-sm-12 col-md-offset-1 col-md-10">
+        <p *ngFor="let alert of alerts">
+            <ngb-alert type="success" (close)="closeAlert(alert)">{{ alert }}</ngb-alert>
+    </p>
+      <div class='row col-sm-12'>
+        <br>
+        <div class="form-group col-sm-3">
+          <label for="forDate" class="col-sm-4 control-label">Email</label>
+          <div class="col-sm-8">
+            <input class="form-control" [(ngModel)]="searchMail" type="text">
+          </div>
+        </div>
+        <div>
+          <div class="col-sm-2">
+            <button type="button" class="btn btn-info" (click)="filterUsers()">Filter Users</button>
+            <button type="button" class="btn btn-default" (click)="reset()">Reset</button>
+          </div>
+        </div>
+      </div>
+      <ngb-pagination [collectionSize]="totalItems" [pageSize]="10" [(page)]="pageIndex" [maxSize]="10" [rotate]="true" (pageChange)="getUsers()"></ngb-pagination>
+      <table id="tripstable" class="table table-hover">
+        <thead>
+          <tr class="table-head">
+            <th>ProfilePicture</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Locked?</th>
+            <th>Creation Date</th>
+            <th>Email Confirmation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users">
+              <td style="padding:0px"><img style='margin:0px 20px' width="50" [src]="user.picture" ></td>
+              <td>{{user.email}}</td>
+              <select [disabled]='!isAuthorized(user)' class="form-control " name="option" [(ngModel)]="user.role">
+                  <option [disabled]='!auth.isAdmin && role == "admin"'  *ngFor="let role of roles">
+                      {{ role }}
+                  </option>
+              </select>
+              <td><input [disabled]='!isAuthorized(user)' class="check-box form-control" type="checkbox" [checked]="user.isLocked" (change)="user.isLocked = !user.isLocked" /></td>
+              <td>{{user.creationDate}}</td>
+              <td><input [disabled]='!isAuthorized(user)' class="check-box form-control" type="checkbox" [checked]="user.emailConfirmed" (change)="user.emailConfirmed = !user.emailConfirmed" /></td>
+            <td>
+              <button type="button" class="btn btn-primary" (click)="updateUser(user)">Update</button>
+            </td>
+            <td>
+              <span class="glyphicon glyphicon-remove flex-center-vertically" (click)="deleteUser(user.id)"> </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+  </div>
+  

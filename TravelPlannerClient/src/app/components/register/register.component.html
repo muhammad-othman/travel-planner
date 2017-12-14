@@ -1,0 +1,45 @@
+<div class="container">
+    <div class="row col-xs-6">
+        <form class="form-horizontal" #f="ngForm" (ngSubmit)="register(f.value)" >
+                <p *ngFor="let alert of alerts">
+                        <ngb-alert type="danger" (close)="closeAlert(alert)">{{ alert }}</ngb-alert>
+                </p>
+        <div class="form-group">
+            <label for="inputEmail" class="col-sm-4 control-label">Email</label>
+            <div class="col-sm-8">
+                    <input type="email" email required name="email" ngModel #email="ngModel" class="form-control" id="inputEmail" placeholder="Email@email.com">
+                    <div class="alert alert-danger" *ngIf="email.touched && !email.valid">
+                            <div *ngIf="email.errors.required">Email is Required</div>
+                            <div *ngIf="email.errors.email">Email is unvalid</div>
+                    </div>
+                </div>
+        </div>
+        <div class="form-group">
+            <label for="inputPassword" class="col-sm-4 control-label">Password</label>
+            <div class="col-sm-8">
+                    <input type="password" minlength="6" required  name="password" #password="ngModel" ngModel class="form-control" id="inputPassword" placeholder="Password">
+                    <div class="alert alert-danger" *ngIf="password.touched && !password.valid">
+                            <div *ngIf="password.errors.required">Password is Required</div>
+                            <div *ngIf="password.errors.minlength">Password should be atleast 6 characters</div>
+                    </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputConfirmPassword" class="col-sm-4 control-label">Confirm Password</label>
+            <div class="col-sm-8">
+                    <input type="password" ng-m minlength="6" required  name="confirmPassword" #confirmPassword="ngModel" ngModel class="form-control" id="inputConfirmPassword" placeholder="Confirm Password">
+                    <div class="alert alert-danger" *ngIf="confirmPassword.touched && !confirmPassword.valid">
+                            <div *ngIf="confirmPassword.errors.required">Password Confirmation is Required</div>
+                            <div *ngIf="confirmPassword.errors.minlength">Password Confirmation should be atleast 6 characters</div>
+                    </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input type="submit" [disabled]='!f.valid' class="btn btn-success" value="Register" />
+            </div>
+        </div>
+        </form>
+        <br>
+    </div>
+</div>

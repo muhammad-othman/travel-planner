@@ -1,0 +1,59 @@
+<div class="container">
+  <div class="col-md-6 col-sm-12">
+    <form class="form-horizontal" >
+        <p *ngFor="let alert of alerts">
+            <ngb-alert type="danger" (close)="closeAlert(alert)">{{ alert }}</ngb-alert>
+        </p>
+      <h5 id="title" class='center'>{{header}}</h5>
+      <div class="form-group">
+        <label for="pac-input" class="col-sm-3 control-label">Destination</label>
+        <div class="col-sm-9">
+          <input type="text" name="destination" [(ngModel)]="trip.destination" class="form-control" id="pac-input" placeholder="Enter a location">
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="datepicker" class="col-sm-3 control-label">Start Date</label>
+        <div class="col-sm-9">
+          <input type="text" name="startDate"  [(ngModel)]="trip.startDate" class="form-control" id="datepicker" placeholder="Start Date">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="datepicker2" class="col-sm-3 control-label">End Date</label>
+        <div class="col-sm-9">
+          <input type="text" name="endDate"  [(ngModel)]="trip.endDate" class="form-control" id="datepicker2" placeholder="End Date">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="comment" class="col-sm-3 control-label">Comment</label>
+        <div class="col-sm-9">
+          <textarea rows="5" name="comment" [(ngModel)]="trip.comment" class="form-control" id="comment"></textarea>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="sightseeing" class="col-sm-3 control-label">Sightseeing</label>
+        <div class="col-sm-7">
+            <input type="text" name="sightseeing" [(ngModel)]="sightseeing" class="form-control" id="pac-input" placeholder="Enter a sightseeing">
+            <div class="col-sm-12">
+                <ul style="list-style: none;padding: 2px 10px;margin: 2px;">
+                  <li *ngFor="let sight of trip.sightseeings;let i=index" >
+                      <span class="glyphicon glyphicon-remove" (click)="removeSightseeing(i)" > </span>{{ sight }}
+                  </li>
+                </ul>
+              </div>
+        </div>
+        <div class="col-sm-2" >
+            <button style="padding: 6px 15px;margin: 0px;" (click)="addSightseeing()" class="btn btn-primary">Add</button>
+          </div>
+        
+      </div>
+
+      <div class="center">
+        <button type="submit" class="btn btn-success" (click)=addTrip()>{{button}}</button>
+      </div>
+    </form>
+  </div>
+  <div class="col-md-6 col-sm-12">
+    <div id="map"></div>
+  </div>
+</div>

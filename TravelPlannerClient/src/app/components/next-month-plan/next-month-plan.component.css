@@ -1,0 +1,14 @@
+#map {
+    height: 600px;
+    width: 1000px;
+    text-align: center;
+    margin: auto;
+  }
+  
+  
+  #title {
+    font-size: 25px;
+    font-weight: 500;
+    padding: 6px 22px;
+    font-weight: bold;
+  }

@@ -1,0 +1,19 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "allowJs": true,
+    "outDir": "../out-tsc/app",
+    "baseUrl": "./",
+    "module": "es2015",
+    "types": []
+  },"include": [
+    "app/**/*",
+    "./polyfills.ts",
+    "./main.ts"
+],
+  "exclude": [
+    "test.ts",
+    "**/*.spec.ts"
+  ]
+}
