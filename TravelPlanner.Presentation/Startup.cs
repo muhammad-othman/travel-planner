@@ -8,10 +8,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using TravelPlanner.Presentation.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using TravelPlanner.Presentation.Model.Entities;
 using Newtonsoft.Json;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -23,6 +21,18 @@ using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 using TravelPlanner.Presentation.Model.Repositories.IRepositories;
 using TravelPlanner.Presentation.Model.Repositories;
+using TravelPlanner.Shared.Entities;
+using TravelPlanner.Presentation.IdentityCustomeStores;
+using TravelPlanner.QueryServices.Roles;
+using TravelPlanner.QueryServices.Users;
+using TravelPlanner.QueryServices.Trips;
+using TravelPlanner.CommandsServices.Roles;
+using TravelPlanner.CommandsServices.Users;
+using TravelPlanner.CommandsServices.Trips;
+using TravelPlanner.Shared.IRepos;
+using TravelPlanner.Persistence.Repos;
+using TravelPlanner.Persistence;
+using MediatR;
 
 namespace TravelPlanner.Presentation
 {
@@ -40,8 +50,9 @@ namespace TravelPlanner.Presentation
         {
 
 
-            services.AddIdentity<TravelUser, IdentityRole>(ConfigureIdentity)
-                .AddEntityFrameworkStores<TravelPlannerContext>().AddDefaultTokenProviders();
+            services.AddIdentity<TravelUser, UserRole>(ConfigureIdentity).AddUserStore<TravelUserStore>()
+                .AddRoleStore<UserRoleStore>().AddDefaultTokenProviders();
+
             services.AddAuthentication()
                 .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, cfg =>
                 {
@@ -65,19 +76,14 @@ namespace TravelPlanner.Presentation
                     facebookOptions.AppSecret = _conf["SocialMediaAuthentication:Facebook:AppSecret"];
                 });
 
-            services.AddDbContext<TravelPlannerContext>(conf =>
-            {
-                conf.UseSqlServer(_conf.GetConnectionString("TravelPlannerConnectionString"));
-            });
-
-            services.AddTransient<DBSeeder>();
 
             services.AddTransient<IEmailSender, EmailSender>();
             services.AddTransient<ITripRepository, TripRepository>();
             services.AddTransient<ITravelUserRepository, TravelUserRepository>();
 
-            services.AddAutoMapper();
+            AddServices(services);
 
+            services.AddAutoMapper();
             services.AddMvc()
                 .AddJsonOptions(opt => opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
 
@@ -86,6 +92,51 @@ namespace TravelPlanner.Presentation
                 options.SendGridUser = _conf["SendGrid:SendGridUser"];
                 options.SendGridKey = _conf["SendGrid:SendGridKey"];
             });
+
+        }
+
+        private void AddServices(IServiceCollection services)
+        {
+            services.AddScoped(typeof(IRolesReadService), typeof(RolesReadService));
+            services.AddScoped(typeof(IUsersReadService), typeof(UsersReadService));
+            services.AddScoped(typeof(ITripsReadService), typeof(TripsReadService));
+
+            services.AddScoped(typeof(IRolesWriteService), typeof(RolesWriteService));
+            services.AddScoped(typeof(IUsersWriteService), typeof(UsersWriteService));
+            services.AddScoped(typeof(ITripsWriteService), typeof(TripsWriteService));
+
+            services.AddScoped(typeof(IRolesReadRepo), typeof(RolesRepo));
+            services.AddScoped(typeof(IRolesWriteRepo), typeof(RolesRepo));
+
+            services.AddScoped(typeof(ITripsReadRepo), typeof(TripsRepo));
+            services.AddScoped(typeof(ITripsWriteRepo), typeof(TripsRepo));
+
+            services.AddScoped(typeof(IUsersReadRepo), typeof(UsersRepo));
+            services.AddScoped(typeof(IUsersWriteRepo), typeof(UsersRepo));
+
+            var builder = new DbContextOptionsBuilder<TravelPlannerContext>();
+            var connectionString = _conf.GetConnectionString("TravelPlannerConnectionString");
+            builder.UseSqlServer(connectionString);
+
+            services.AddSingleton<TravelPlannerContext, TravelPlannerContext>(e => new TravelPlannerContext(builder.Options));
+
+            services.Scan(scan => scan
+                .FromAssembliesOf(typeof(RoleCommandsHandler))
+                .AddClasses()
+                .AsImplementedInterfaces());
+            services.Scan(scan => scan
+                .FromAssembliesOf(typeof(RoleQueriesHandler))
+                .AddClasses()
+                .AsImplementedInterfaces());
+
+            services.Scan(scan => scan
+                .FromAssembliesOf(typeof(IMediator), typeof(RolesReadService))
+                .AddClasses()
+                .AsImplementedInterfaces());
+            services.Scan(scan => scan
+               .FromAssembliesOf(typeof(IMediator), typeof(RolesWriteService))
+               .AddClasses()
+               .AsImplementedInterfaces());
 
         }
 

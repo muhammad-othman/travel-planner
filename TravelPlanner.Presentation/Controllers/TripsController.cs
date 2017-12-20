@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TravelPlanner.Presentation.Model;
-using TravelPlanner.Presentation.Model.Entities;
 using Microsoft.AspNetCore.Authorization;
-using TravelPlanner.Presentation.Model.Repositories.IRepositories;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using TravelPlanner.Presentation.ViewModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Cors;
+using TravelPlanner.Shared.IRepos;
+using TravelPlanner.Shared.Entities;
+using TravelPlanner.CommandsServices.Trips;
+using TravelPlanner.QueryServices.Trips;
 
 namespace TravelPlanner.Presentation.Controllers
 {
@@ -21,13 +21,16 @@ namespace TravelPlanner.Presentation.Controllers
     public class TripsController : Controller
     {
         private readonly UserManager<TravelUser> _userManager;
-        private readonly ITripRepository _tripRepository;
+        private readonly ITripsWriteService _tripsWriteService;
+        private readonly ITripsReadService _tripsReadService;
         private readonly IMapper _mapper;
 
-        public TripsController(UserManager<TravelUser> userManager, ITripRepository tripRepository, IMapper mapper)
-        {
+        public TripsController(UserManager<TravelUser> userManager,
+            ITripsWriteService tripsWriteService, ITripsReadService tripsReadService, IMapper mapper)
+        {                                                           
             _userManager = userManager;
-            _tripRepository = tripRepository;
+            _tripsWriteService = tripsWriteService;
+            _tripsReadService = tripsReadService;
             _mapper = mapper;
         }
         [HttpGet("{id}")]
@@ -36,7 +39,7 @@ namespace TravelPlanner.Presentation.Controllers
             try
             {
                 var user = await _userManager.FindByEmailAsync(User.Identity.Name);
-                TripViewModel Trip= _mapper.Map<TripViewModel>(_tripRepository.GetById(id));
+                TripViewModel Trip= _mapper.Map<TripViewModel>(_tripsReadService.GetTripById(user,id).Result.Trip);
                 var roles = await _userManager.GetRolesAsync(user);
                     if (Trip.UserEmail != user.Email && !roles.Contains("admin"))
                     return NotFound();
@@ -55,7 +58,7 @@ namespace TravelPlanner.Presentation.Controllers
                 var user = await _userManager.FindByEmailAsync(User.Identity.Name);
                 if (!alltrips)
                 {
-                    IEnumerable<TripViewModel> Trips = _tripRepository.GetUserTrips(user.Id, from, to, destination).Select(_mapper.Map<TripViewModel>).OrderByDescending(e => e.StartDate);
+                    IEnumerable<TripViewModel> Trips = _tripsReadService.GetUserTrips(user,user.Id, from, to, destination).Result.Trips.Select(_mapper.Map<TripViewModel>).OrderByDescending(e => e.StartDate);
                     int totalCount = Trips.Count();
                     Trips = Trips.Skip((pageIndex - 1) * pageSize).Take(pageSize);
                     return Ok(new { Trips, totalCount });
@@ -65,7 +68,7 @@ namespace TravelPlanner.Presentation.Controllers
                     var roles = await _userManager.GetRolesAsync(user);
                     if (!roles.Contains("admin"))
                         return Unauthorized();
-                    IEnumerable<TripViewModel> Trips = _tripRepository.GetTrips(from, to, destination).Select(_mapper.Map<TripViewModel>).OrderByDescending(e => e.StartDate);
+                    IEnumerable<TripViewModel> Trips = _tripsReadService.GetAllTrips(user,from, to, destination).Result.Trips.Select(_mapper.Map<TripViewModel>).OrderByDescending(e => e.StartDate);
                     int totalCount = Trips.Count();
                     Trips = Trips.Skip((pageIndex - 1) * pageSize).Take(pageSize);
                     return Ok(new { Trips, totalCount });
@@ -86,7 +89,7 @@ namespace TravelPlanner.Presentation.Controllers
                 var user = await _userManager.FindByEmailAsync(User.Identity.Name);
                 var t = _mapper.Map<Trip>(trip);
                 t.TravelUserId = user.Id;
-                var createdTrip = _tripRepository.Create(t);
+                var createdTrip = _tripsWriteService.CreateTripAsync(user, t).Result.Trip;
                 if (createdTrip != null)
                     return Ok(createdTrip);
                 return BadRequest();
@@ -107,7 +110,8 @@ namespace TravelPlanner.Presentation.Controllers
                 var roles = await _userManager.GetRolesAsync(user);
                 if (trip.UserEmail != user.Email && !roles.Contains("admin"))
                     return NotFound();
-                var updatedTrip = _tripRepository.Update(id,_mapper.Map<Trip>(trip));
+                trip.Id = id;
+                var updatedTrip = _tripsWriteService.UpdateTripAsync(user, _mapper.Map<Trip>(trip)).Result.Trip; 
                 if (updatedTrip == null)
                     return NotFound();
 
@@ -124,11 +128,11 @@ namespace TravelPlanner.Presentation.Controllers
             try
             {
                 var user = await _userManager.FindByEmailAsync(User.Identity.Name);
-                TripViewModel Trip = _mapper.Map<TripViewModel>(_tripRepository.GetById(id));
+                TripViewModel trip = _mapper.Map<TripViewModel>(_tripsReadService.GetTripById(user,id));
                 var roles = await _userManager.GetRolesAsync(user);
-                if (Trip.UserEmail != user.Email && !roles.Contains("admin"))
+                if (trip.UserEmail != user.Email && !roles.Contains("admin"))
                     return NotFound();
-                var deleted = _tripRepository.Delete(id);
+                var deleted = _tripsWriteService.UpdateTripAsync(user, _mapper.Map<Trip>(trip)).Result.Trip;
                 if (deleted == null)
                     return NotFound();
                 return NoContent();

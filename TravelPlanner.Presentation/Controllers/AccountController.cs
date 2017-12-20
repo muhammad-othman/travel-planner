@@ -33,14 +33,11 @@ namespace TravelPlanner.Presentation.Controllers
         private readonly UserManager<TravelUser> _userManager;
         private readonly IConfiguration _configuration;
         private readonly IEmailSender _emailSender;
-        private readonly ITravelUserRepository _userRepository;
         public AccountController(SignInManager<TravelUser> signInManager,
             UserManager<TravelUser> userManager,
             IConfiguration configuration,
-            IEmailSender emailSender,
-            ITravelUserRepository userRepository)
+            IEmailSender emailSender)
         {
-            _userRepository = userRepository;
             _signInManager = signInManager;
             _userManager = userManager;
             _configuration = configuration;
@@ -222,7 +219,7 @@ namespace TravelPlanner.Presentation.Controllers
             {
                 await file.CopyToAsync(stream);
             }
-            _userRepository.UpdatePricture(user.Email + file.FileName, user);
+            //_userRepository.UpdatePricture(user.Email + file.FileName, user);
             return Ok(user.Email+file.FileName);
         }
 

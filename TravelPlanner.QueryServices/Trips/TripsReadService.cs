@@ -8,7 +8,7 @@ using TravelPlanner.Shared.Entities;
 
 namespace TravelPlanner.QueryServices.Trips
 {
-    public class TripsReadService
+    public class TripsReadService : ITripsReadService
     {
         private readonly IMediator _mediator;
         public TripsReadService(IMediator mediator)

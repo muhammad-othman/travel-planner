@@ -5,13 +5,15 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
-using TravelPlanner.Presentation.Model.Entities;
 using AutoMapper;
 using TravelPlanner.Presentation.Model.Repositories.IRepositories;
 using TravelPlanner.Presentation.ViewModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
+using TravelPlanner.Shared.Entities;
+using TravelPlanner.QueryServices.Users;
+using TravelPlanner.CommandsServices.Users;
 
 namespace TravelPlanner.Presentation.Controllers
 {
@@ -20,13 +22,16 @@ namespace TravelPlanner.Presentation.Controllers
     public class UsersController : Controller
     {
         private readonly UserManager<TravelUser> _userManager;
-        private readonly ITravelUserRepository _userRepository;
+        private readonly IUsersWriteService _usersWriteService;
+        private readonly IUsersReadService _usersReadService;
         private readonly IMapper _mapper;
 
-        public UsersController(UserManager<TravelUser> userManager, ITravelUserRepository userRepository, IMapper mapper)
+        public UsersController(UserManager<TravelUser> userManager,
+            IUsersWriteService usersWriteService, IUsersReadService usersReadService, IMapper mapper)
         {
             _userManager = userManager;
-            _userRepository = userRepository;
+            _usersWriteService = usersWriteService;
+            _usersReadService = usersReadService;
             _mapper = mapper;
         }
         [HttpGet("{id}")]
@@ -53,7 +58,7 @@ namespace TravelPlanner.Presentation.Controllers
         {
             try
             {
-                UserViewModel user = MapToVM(_userRepository.GetById(id));
+                UserViewModel user = MapToVM(_usersReadService.GetUserById(id).Result.User);
                 return Ok(user);
             }
             catch (Exception)
@@ -66,7 +71,8 @@ namespace TravelPlanner.Presentation.Controllers
         {
             try
             {
-                    IEnumerable<UserViewModel> users = _userRepository.GetUsers(email).Select(MapToVM).OrderByDescending(e => e.CreationDate);
+                var currentUser = await _userManager.FindByEmailAsync(User.Identity.Name);
+                IEnumerable<UserViewModel> users = _usersReadService.GetAllUsers(currentUser, email).Result.Users.Select(MapToVM).OrderByDescending(e => e.CreationDate);
                     int totalCount = users.Count();
                     users = users.Skip((pageIndex - 1) * pageSize).Take(pageSize);
                     return Ok(new { users, totalCount });
@@ -82,15 +88,15 @@ namespace TravelPlanner.Presentation.Controllers
             if (!ModelState.IsValid) return BadRequest();
             try
             {
-                var editor = await _userManager.FindByEmailAsync(User.Identity.Name);
-                var roles = await _userManager.GetRolesAsync(editor);
-                if (user.Role == "admin" &&  !roles.Contains("admin"))
-                    return Unauthorized();
-                var updatedUser = _userRepository.Update(id, user, _userManager);
-                if (updatedUser == null)
+                //var editor = await _userManager.FindByEmailAsync(User.Identity.Name);
+                //var roles = await _userManager.GetRolesAsync(editor);
+                //if (user.Role == "admin" &&  !roles.Contains("admin"))
+                //    return Unauthorized();
+                //var updatedUser = _usersWriteService.UpdateUserAsync(user);
+                //if (updatedUser == null)
                     return NotFound();
 
-                return Ok(updatedUser);
+                //return Ok(updatedUser);
             }
             catch (Exception)
             {
@@ -102,7 +108,7 @@ namespace TravelPlanner.Presentation.Controllers
         {
             try
             {
-                UserViewModel user = MapToVM(_userRepository.GetById(id));
+                UserViewModel user = MapToVM(_usersReadService.GetUserById(id).Result.User);
                 var editor = await _userManager.FindByEmailAsync(User.Identity.Name);
 
                 if (user.Id == editor.Id)
@@ -111,7 +117,7 @@ namespace TravelPlanner.Presentation.Controllers
                 if (user.Role == "admin" && !roles.Contains("admin"))
                     return Unauthorized();
 
-                var deleted = _userRepository.Delete(id);
+                var deleted = _usersWriteService.DeleteUserAsync(id).Result.User;
                 if (deleted == null)
                     return NotFound();
                 return NoContent();

@@ -5,6 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
 using TravelPlanner.Shared.Entities;
+using TravelPlanner.QueryServices.Users;
+using TravelPlanner.CommandsServices.Users;
+using TravelPlanner.Shared.Enums;
 
 namespace TravelPlanner.Presentation.IdentityCustomeStores
 {
@@ -14,79 +17,90 @@ namespace TravelPlanner.Presentation.IdentityCustomeStores
                          IUserPasswordStore<TravelUser>,
                          IUserSecurityStampStore<TravelUser>
     {
-        public Task AddLoginAsync(TravelUser user, UserLoginInfo login, CancellationToken cancellationToken)
+        private readonly IUsersReadService _usersReadService;
+        private readonly IUsersWriteService _usersWriteService;
+
+        public TravelUserStore(IUsersReadService usersReadService, IUsersWriteService usersWriteService)
         {
-            throw new NotImplementedException();
+            _usersReadService = usersReadService;
+            _usersWriteService = usersWriteService;
+        }
+        
+
+        public async Task<IdentityResult> CreateAsync(TravelUser user, CancellationToken cancellationToken)
+        {
+            var result =  await _usersWriteService.CreateUserAsync(user);
+            if (result.Result == Result.Succeeded)
+                return IdentityResult.Success;
+            return IdentityResult.Failed();
         }
 
-        public Task AddToRoleAsync(TravelUser user, string roleName, CancellationToken cancellationToken)
+        public async Task<IdentityResult> DeleteAsync(TravelUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<IdentityResult> CreateAsync(TravelUser user, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IdentityResult> DeleteAsync(TravelUser user, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
+            var result = await _usersWriteService.DeleteUserAsync(user.Id);
+            if (result.Result == Result.Succeeded)
+                return IdentityResult.Success;
+            return IdentityResult.Failed();
         }
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
-        public Task<TravelUser> FindByIdAsync(string userId, CancellationToken cancellationToken)
+        
+        public async Task<TravelUser> FindByIdAsync(string userId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var result = await _usersReadService.GetUserById(userId);
+            if (result.Result == Result.Succeeded)
+                return result.User;
+            return null;
         }
 
-        public Task<TravelUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
+        
+
+        public async Task<TravelUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var result = await _usersReadService.GetUserByEmail(normalizedUserName);
+            if (result.Result == Result.Succeeded)
+                return result.User;
+            return null;
         }
 
-        public Task<TravelUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IList<UserLoginInfo>> GetLoginsAsync(TravelUser user, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public Task<string> GetNormalizedUserNameAsync(TravelUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(user.Email);
         }
 
         public Task<string> GetPasswordHashAsync(TravelUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(user.PasswordHash);
         }
 
         public Task<IList<string>> GetRolesAsync(TravelUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            IList<string> roles = new List<string>();
+            foreach (var role in user.Roles)
+            {
+                roles.Add(role.Name);
+            }
+            return Task.FromResult(roles);
         }
 
         public Task<string> GetSecurityStampAsync(TravelUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(user.SecurityStamp);
         }
 
         public Task<string> GetUserIdAsync(TravelUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(user.Id);
         }
 
         public Task<string> GetUserNameAsync(TravelUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(user.Email);
         }
 
         public Task<IList<TravelUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
@@ -96,19 +110,41 @@ namespace TravelPlanner.Presentation.IdentityCustomeStores
 
         public Task<bool> HasPasswordAsync(TravelUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(!string.IsNullOrWhiteSpace(user.PasswordHash));
         }
 
         public Task<bool> IsInRoleAsync(TravelUser user, string roleName, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            bool isInRole = false;
+            foreach (var role in user.Roles)
+            {
+                if (role.Name.ToLower() == roleName.ToLower())
+                    isInRole = true;
+            }
+            return Task.FromResult(isInRole);
         }
 
         public Task RemoveFromRoleAsync(TravelUser user, string roleName, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
+        public Task<IList<UserLoginInfo>> GetLoginsAsync(TravelUser user, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+        public Task<TravelUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+        public Task AddLoginAsync(TravelUser user, UserLoginInfo login, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
 
+        public Task AddToRoleAsync(TravelUser user, string roleName, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
         public Task RemoveLoginAsync(TravelUser user, string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
@@ -116,27 +152,30 @@ namespace TravelPlanner.Presentation.IdentityCustomeStores
 
         public Task SetNormalizedUserNameAsync(TravelUser user, string normalizedName, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.Run(()=>user.Email = normalizedName);
         }
 
         public Task SetPasswordHashAsync(TravelUser user, string passwordHash, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.Run(() => user.PasswordHash = passwordHash);
         }
 
         public Task SetSecurityStampAsync(TravelUser user, string stamp, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.Run(() => user.SecurityStamp = stamp);
         }
 
         public Task SetUserNameAsync(TravelUser user, string userName, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.Run(() => user.Email = userName);
         }
 
-        public Task<IdentityResult> UpdateAsync(TravelUser user, CancellationToken cancellationToken)
+        public async Task<IdentityResult> UpdateAsync(TravelUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var result = await _usersWriteService.UpdateUserAsync(user);
+            if (result.Result == Result.Succeeded)
+                return IdentityResult.Success;
+            return IdentityResult.Failed();
         }
     }
 }
