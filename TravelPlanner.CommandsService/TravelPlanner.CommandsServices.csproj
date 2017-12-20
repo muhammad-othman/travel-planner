@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <AssemblyName>TravelPlanner.CommandsServices</AssemblyName>
+    <RootNamespace>TravelPlanner.CommandsServices</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="4.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TravelPlanner.Shared\TravelPlanner.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

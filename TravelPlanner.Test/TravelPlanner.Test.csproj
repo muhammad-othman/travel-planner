@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TravelPlanner\TravelPlanner.csproj" />
+    <ProjectReference Include="..\TravelPlanner.Presentation\TravelPlanner.Presentation.csproj" />
   </ItemGroup>
 
 </Project>

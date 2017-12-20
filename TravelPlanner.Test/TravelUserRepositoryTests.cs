@@ -4,9 +4,9 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TravelPlanner.Model;
-using TravelPlanner.Model.Entities;
-using TravelPlanner.Model.Repositories;
+using TravelPlanner.Presentation.Model;
+using TravelPlanner.Presentation.Model.Entities;
+using TravelPlanner.Presentation.Model.Repositories;
 
 namespace TravelPlanner.Test
 {
