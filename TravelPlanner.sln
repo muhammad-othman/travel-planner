@@ -7,11 +7,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TravelPlanner.Presentation"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TravelPlanner.Test", "TravelPlanner.Test\TravelPlanner.Test.csproj", "{61736C78-0CDE-4B3C-830B-E8F54C72BF9D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TravelPlanner.Shared", "TravelPlanner.Shared\TravelPlanner.Shared.csproj", "{01B47082-FFDC-46D6-8E07-A297BD178886}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TravelPlanner.Shared", "TravelPlanner.Shared\TravelPlanner.Shared.csproj", "{01B47082-FFDC-46D6-8E07-A297BD178886}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TravelPlanner.CommandsServices", "TravelPlanner.CommandsService\TravelPlanner.CommandsServices.csproj", "{3B186EB1-ABAF-4C8D-8FC5-89124849FCC3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TravelPlanner.CommandsServices", "TravelPlanner.CommandsService\TravelPlanner.CommandsServices.csproj", "{3B186EB1-ABAF-4C8D-8FC5-89124849FCC3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TravelPlanner.QueryServices", "TravelPlanner.QueryServices\TravelPlanner.QueryServices.csproj", "{96FCBC96-49DA-4539-AFC3-9D105D51466A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TravelPlanner.Persistence", "TravelPlanner.Persistence\TravelPlanner.Persistence.csproj", "{16FADC17-FB6B-42AE-A094-B23C7508BA2C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{96FCBC96-49DA-4539-AFC3-9D105D51466A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{96FCBC96-49DA-4539-AFC3-9D105D51466A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{96FCBC96-49DA-4539-AFC3-9D105D51466A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16FADC17-FB6B-42AE-A094-B23C7508BA2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16FADC17-FB6B-42AE-A094-B23C7508BA2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16FADC17-FB6B-42AE-A094-B23C7508BA2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16FADC17-FB6B-42AE-A094-B23C7508BA2C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

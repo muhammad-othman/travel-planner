@@ -8,10 +8,10 @@ using TravelPlanner.Shared.Entities;
 
 namespace TravelPlanner.CommandsServices.Users
 {
-    public class UsersService
+    public class UsersWriteService : IUsersWriteService
     {
         private readonly IMediator _mediator;
-        public UsersService(IMediator mediator)
+        public UsersWriteService(IMediator mediator)
         {
             _mediator = mediator;
         }
