@@ -30,7 +30,7 @@ namespace TravelPlanner.Presentation.IdentityCustomeStores
         public async Task<IdentityResult> CreateAsync(TravelUser user, CancellationToken cancellationToken)
         {
             var result =  await _usersWriteService.CreateUserAsync(user);
-            if (result.Result == Result.Succeeded)
+            if (result.Status == ResponseStatus.Succeeded)
                 return IdentityResult.Success;
             return IdentityResult.Failed();
         }
@@ -38,7 +38,7 @@ namespace TravelPlanner.Presentation.IdentityCustomeStores
         public async Task<IdentityResult> DeleteAsync(TravelUser user, CancellationToken cancellationToken)
         {
             var result = await _usersWriteService.DeleteUserAsync(user.Id);
-            if (result.Result == Result.Succeeded)
+            if (result.Status == ResponseStatus.Succeeded)
                 return IdentityResult.Success;
             return IdentityResult.Failed();
         }
@@ -52,7 +52,7 @@ namespace TravelPlanner.Presentation.IdentityCustomeStores
         public async Task<TravelUser> FindByIdAsync(string userId, CancellationToken cancellationToken)
         {
             var result = await _usersReadService.GetUserById(userId);
-            if (result.Result == Result.Succeeded)
+            if (result.Status == ResponseStatus.Succeeded)
                 return result.User;
             return null;
         }
@@ -62,7 +62,7 @@ namespace TravelPlanner.Presentation.IdentityCustomeStores
         public async Task<TravelUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
             var result = await _usersReadService.GetUserByEmail(normalizedUserName);
-            if (result.Result == Result.Succeeded)
+            if (result.Status == ResponseStatus.Succeeded)
                 return result.User;
             return null;
         }
@@ -173,7 +173,7 @@ namespace TravelPlanner.Presentation.IdentityCustomeStores
         public async Task<IdentityResult> UpdateAsync(TravelUser user, CancellationToken cancellationToken)
         {
             var result = await _usersWriteService.UpdateUserAsync(user);
-            if (result.Result == Result.Succeeded)
+            if (result.Status == ResponseStatus.Succeeded)
                 return IdentityResult.Success;
             return IdentityResult.Failed();
         }

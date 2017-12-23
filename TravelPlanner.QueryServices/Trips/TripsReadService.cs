@@ -15,14 +15,14 @@ namespace TravelPlanner.QueryServices.Trips
         {
             _mediator = mediator;
         }
-        public async Task<MultipleTripsQueryResponse> GetUserTrips(TravelUser currentUser, string userId, DateTime? from, DateTime? to, string destination)
+        public async Task<MultipleTripsQueryResponse> GetUserTrips(TravelUser currentUser, string userId, DateTime? from, DateTime? to, string destination, int? pageIndex, int? pageSize)
         {
-            var query = new GetUserTripsQuery(currentUser, userId, from, to , destination);
+            var query = new GetUserTripsQuery(currentUser, userId, from, to , destination, pageIndex, pageSize);
             return await _mediator.Send(query);
         }
-        public async Task<MultipleTripsQueryResponse> GetAllTrips(TravelUser currentUser, DateTime? from, DateTime? to, string destination)
+        public async Task<MultipleTripsQueryResponse> GetAllTrips(TravelUser currentUser, DateTime? from, DateTime? to, string destination, int? pageIndex, int? pageSize)
         {
-            var query = new GetAllTripsQuery(currentUser, from, to, destination);
+            var query = new GetAllTripsQuery(currentUser, from, to, destination, pageIndex, pageSize);
             return await _mediator.Send(query);
         }
         public async Task<SingleTripQueryResponse> GetTripById(TravelUser user, int TripId)

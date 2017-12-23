@@ -8,7 +8,7 @@ namespace TravelPlanner.CommandsServices.Trips
 {
     public class TripCommandResponse
     {
-        public Result Result { get; set; }
+        public ResponseStatus Status { get; set; }
 
         public ICollection<string> Errors { get; set; }
         public Trip Trip { get; }

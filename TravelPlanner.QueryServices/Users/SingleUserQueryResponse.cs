@@ -8,7 +8,7 @@ namespace TravelPlanner.QueryServices.Users
 {
     public class SingleUserQueryResponse
     {
-        public Result Result { get; set; }
+        public ResponseStatus Status { get; set; }
         public ICollection<string> Errors { get; set; }
         public TravelUser User { get; }
 

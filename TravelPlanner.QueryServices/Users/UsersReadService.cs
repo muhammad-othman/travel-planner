@@ -15,11 +15,6 @@ namespace TravelPlanner.QueryServices.Users
         {
             _mediator = mediator;
         }
-        public async Task<MultipleUsersQueryResponse> GetAllUsers(TravelUser currentUser)
-        {
-            var query = new GetAllUsersQuery(currentUser);
-            return await _mediator.Send(query);
-        }
         public async Task<SingleUserQueryResponse> GetUserById(string id)
         {
             var query = new GetUserByIdQuery(id);
@@ -28,6 +23,11 @@ namespace TravelPlanner.QueryServices.Users
         public async Task<SingleUserQueryResponse> GetUserByEmail (string email)
         {
             var query = new GetUserByEmailQuery(email);
+            return await _mediator.Send(query);
+        }
+        public async Task<MultipleUsersQueryResponse> GetAllUsersAsync(TravelUser currentUser, string email, int? pageIndex, int? pageSize)
+        {
+            var query = new GetAllUsersQuery(currentUser,email,pageIndex, pageSize);
             return await _mediator.Send(query);
         }
     }

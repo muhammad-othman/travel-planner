@@ -8,7 +8,7 @@ namespace TravelPlanner.QueryServices.Roles
 {
     public class MultipleRolesQueryResponse
     {
-        public Result Result { get; set; }
+        public ResponseStatus Status { get; set; }
         public ICollection<string> Errors { get; set; }
         public ICollection<UserRole> Roles { get; }
 

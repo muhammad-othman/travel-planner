@@ -28,9 +28,9 @@ namespace TravelPlanner.CommandsServices.Trips
             Trip Trip = _repo.CreateTrip(request.Data);
             var response = new TripCommandResponse(Trip);
             if (Trip != null)
-                response.Result = Result.Succeeded;
+                response.Status = ResponseStatus.Succeeded;
             else
-                response.Result = Result.Failed;
+                response.Status = ResponseStatus.Failed;
 
             return Task.FromResult(response);
         }
@@ -40,9 +40,9 @@ namespace TravelPlanner.CommandsServices.Trips
             Trip Trip = _repo.UpdateTrip(request.Data);
             var response = new TripCommandResponse(Trip);
             if (Trip != null)
-                response.Result = Result.Succeeded;
+                response.Status = ResponseStatus.Succeeded;
             else
-                response.Result = Result.Failed;
+                response.Status = ResponseStatus.Failed;
 
             return Task.FromResult(response);
         }
@@ -52,9 +52,9 @@ namespace TravelPlanner.CommandsServices.Trips
             Trip Trip = _repo.DeleteTrip(request.TripId);
             var response = new TripCommandResponse(Trip);
             if (Trip != null)
-                response.Result = Result.Succeeded;
+                response.Status = ResponseStatus.Succeeded;
             else
-                response.Result = Result.Failed;
+                response.Status = ResponseStatus.Failed;
 
             return Task.FromResult(response);
         }

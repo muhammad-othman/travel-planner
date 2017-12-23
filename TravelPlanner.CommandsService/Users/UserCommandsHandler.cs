@@ -28,9 +28,9 @@ namespace TravelPlanner.CommandsServices.Users
             TravelUser user = _repo.CreateUser(request.Data);
             var response = new UserCommandResponse(user);
             if (user != null)
-                response.Result = Result.Succeeded;
+                response.Status = ResponseStatus.Succeeded;
             else
-                response.Result = Result.Failed;
+                response.Status = ResponseStatus.Failed;
 
             return Task.FromResult(response);
         }
@@ -40,9 +40,9 @@ namespace TravelPlanner.CommandsServices.Users
             TravelUser user = _repo.UpdateUser(request.Data);
             var response = new UserCommandResponse(user);
             if (user != null)
-                response.Result = Result.Succeeded;
+                response.Status = ResponseStatus.Succeeded;
             else
-                response.Result = Result.Failed;
+                response.Status = ResponseStatus.Failed;
 
             return Task.FromResult(response);
         }
@@ -52,9 +52,9 @@ namespace TravelPlanner.CommandsServices.Users
             TravelUser user = _repo.DeleteUser(request.UserId);
             var response = new UserCommandResponse(user);
             if (user != null)
-                response.Result = Result.Succeeded;
+                response.Status = ResponseStatus.Succeeded;
             else
-                response.Result = Result.Failed;
+                response.Status = ResponseStatus.Failed;
 
             return Task.FromResult(response);
         }

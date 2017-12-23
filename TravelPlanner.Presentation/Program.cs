@@ -13,20 +13,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace TravelPlanner.Presentation
 {
-    public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<TravelPlannerContext>
-    {
-        public TravelPlannerContext CreateDbContext(string[] args)
-        {
-            IConfigurationRoot configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("config.json")
-                .Build();
-            var builder = new DbContextOptionsBuilder<TravelPlannerContext>();
-            var connectionString = configuration.GetConnectionString("TravelPlannerConnectionString");
-            builder.UseSqlServer(connectionString);
-            return new TravelPlannerContext(builder.Options);
-        }
-    }
+    //public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<TravelPlannerContext>
+    //{
+    //    public TravelPlannerContext CreateDbContext(string[] args)
+    //    {
+    //        IConfigurationRoot configuration = new ConfigurationBuilder()
+    //            .SetBasePath(Directory.GetCurrentDirectory())
+    //            .AddJsonFile("config.json")
+    //            .Build();
+    //        var builder = new DbContextOptionsBuilder<TravelPlannerContext>();
+    //        var connectionString = configuration.GetConnectionString("TravelPlannerConnectionString");
+    //        builder.UseSqlServer(connectionString);
+    //        return new TravelPlannerContext(builder.Options);
+    //    }
+    //}
     public class Program
     {
         public static void Main(string[] args)

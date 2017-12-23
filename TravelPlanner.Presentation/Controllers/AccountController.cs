@@ -19,10 +19,11 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
-using TravelPlanner.Presentation.Model.Entities;
-using TravelPlanner.Presentation.Model.Repositories.IRepositories;
+using TravelPlanner.CommandsServices.Users;
 using TravelPlanner.Presentation.Services;
 using TravelPlanner.Presentation.ViewModels;
+using TravelPlanner.Shared.Entities;
+using TravelPlanner.Shared.Enums;
 
 namespace TravelPlanner.Presentation.Controllers
 {
@@ -33,15 +34,19 @@ namespace TravelPlanner.Presentation.Controllers
         private readonly UserManager<TravelUser> _userManager;
         private readonly IConfiguration _configuration;
         private readonly IEmailSender _emailSender;
+        private readonly IUsersWriteService _usersWriteService;
+
         public AccountController(SignInManager<TravelUser> signInManager,
             UserManager<TravelUser> userManager,
             IConfiguration configuration,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IUsersWriteService usersWriteService)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _configuration = configuration;
             _emailSender = emailSender;
+            _usersWriteService = usersWriteService;
         }
         public IActionResult Get()
         {
@@ -51,10 +56,20 @@ namespace TravelPlanner.Presentation.Controllers
         [Route("invite/{email}")]
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")]
+
+        private string GenerateInvitationMessage(bool isHtml, string callbackURL)
+        {
+            if (!isHtml)
+                return "I would like to invite you to join our Travel planner at " + callbackURL;
+            
+            return "I would like to invite you to join our Travel planner at  <br> < a href = '" + callbackURL + "' > Travel Planner </ a > + ";
+        }
+
         public async Task<IActionResult> InviteUserAsync(string email)
         {
-            var message = "I would like to invite you to join our Travel planner at " + _configuration["PresentationUrl"];
-            var htmlmessage = "I would like to invite you to join our Travel planner at  <br> < a href = '" + _configuration["PresentationUrl"] + "' > Travel Planner </ a > + "; ;
+            var message = GenerateInvitationMessage(false, _configuration["PresentationUrl"]);
+            var htmlmessage = GenerateInvitationMessage(true, _configuration["PresentationUrl"]);
+
             var apiKey = _configuration["SendGrid:SendGridKey"];
             var client = new SendGridClient(apiKey);
             var msg = new SendGridMessage()
@@ -65,7 +80,7 @@ namespace TravelPlanner.Presentation.Controllers
                 HtmlContent = message
             };
             msg.AddTo(new EmailAddress(email));
-            await client.SendEmailAsync(msg);
+            var resoponse = await client.SendEmailAsync(msg);
             return Ok();
         }
         [HttpGet]
@@ -89,7 +104,7 @@ namespace TravelPlanner.Presentation.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest("Your registeration info are invalid");
-            var user = new TravelUser { UserName = model.Email, Email = model.Email };
+            var user = new TravelUser { NormalizedEmail = model.Email, Email = model.Email };
             user.CreationDate = DateTime.Now;
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
@@ -108,7 +123,7 @@ namespace TravelPlanner.Presentation.Controllers
                 return BadRequest("Something Went Wrong");
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
-                throw new ApplicationException($"Unable to load user with ID '{userId}'.");
+                return BadRequest();
             var result = await _userManager.ConfirmEmailAsync(user, code);
             if (result.Succeeded)
                 return Redirect(_configuration["PresentationUrl"]);
@@ -141,27 +156,11 @@ namespace TravelPlanner.Presentation.Controllers
             TravelUser user = null;
             if (result.Succeeded)
                 user = await _userManager.FindByEmailAsync(email);
-            else
+            else //User doesn't exist so create a new user to this external login info
             {
-                string picture = string.Empty;
-                if (info.LoginProvider == FacebookDefaults.AuthenticationScheme)
-                {
-                    var identifier = info.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
-                    picture = $"https://graph.facebook.com/{identifier}/picture?type=large";
-                }
-                else if (info.LoginProvider == GoogleDefaults.AuthenticationScheme)
-                {
-                    string googleApiKey = _configuration["SocialMediaAuthentication:Google:ApiKey"];
-                    string nameIdentifier = info.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
-                    var jsonUrl = $"https://www.googleapis.com/plus/v1/people/{nameIdentifier}?fields=image&key={googleApiKey}";
-                    using (HttpClient httpClient = new HttpClient())
-                    {
-                        string s = await httpClient.GetStringAsync(jsonUrl);
-                        dynamic deserializeObject = JsonConvert.DeserializeObject(s);
-                        picture = (string)deserializeObject.image.url;
-                    }
-                }
-                user = new TravelUser { UserName = email, Email = email, Picture = picture, EmailConfirmed = true };
+                string picture = await GetPictureUrlAsync(info);
+                
+                user = new TravelUser { NormalizedEmail = email, Email = email, Picture = picture, EmailConfirmed = true };
                 user.CreationDate = DateTime.Now;
                 var createdUser = await _userManager.CreateAsync(user);
 
@@ -173,6 +172,28 @@ namespace TravelPlanner.Presentation.Controllers
             var jwt = await GenerateJwT(user);
             var encoded = _configuration["PresentationUrl"] + "/externallogin/" + jwt.token;
             return Redirect(encoded);
+        }
+
+        private async Task<string> GetPictureUrlAsync(ExternalLoginInfo info)
+        {
+            string picture = string.Empty;
+            if (info.LoginProvider == FacebookDefaults.AuthenticationScheme)
+            {
+                var identifier = info.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
+                picture = $"https://graph.facebook.com/{identifier}/picture?type=large";
+            }
+            else if (info.LoginProvider == GoogleDefaults.AuthenticationScheme)
+            {
+                string googleApiKey = _configuration["SocialMediaAuthentication:Google:ApiKey"];
+                string nameIdentifier = info.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
+                var jsonUrl = $"https://www.googleapis.com/plus/v1/people/{nameIdentifier}?fields=image&key={googleApiKey}";
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    dynamic deserializeObject = JsonConvert.DeserializeObject(await httpClient.GetStringAsync(jsonUrl));
+                    picture = (string)deserializeObject.image.url;
+                }
+            }
+            return picture;
         }
 
         [HttpPost]
@@ -191,12 +212,13 @@ namespace TravelPlanner.Presentation.Controllers
             if (!result.Succeeded)
             {
                 string message = "Wrong Password";
+
                 if (result.IsLockedOut)
-                {
                     message = "Your Account is Locked, Please Contact the Manager";
-                }
+
                 else if (result.IsNotAllowed)
                     message = "You aren't allowed to Login";
+
                 return BadRequest(message);
             }
             var jwt = await GenerateJwT(user);
@@ -209,6 +231,7 @@ namespace TravelPlanner.Presentation.Controllers
         {
             if (file == null || file.Length == 0)
                 return Content("file not selected");
+
             var user = await _userManager.FindByEmailAsync(User.Identity.Name);
 
             var path = Path.Combine(
@@ -219,8 +242,16 @@ namespace TravelPlanner.Presentation.Controllers
             {
                 await file.CopyToAsync(stream);
             }
-            //_userRepository.UpdatePricture(user.Email + file.FileName, user);
-            return Ok(user.Email+file.FileName);
+
+            user.Picture = user.Email + file.FileName;
+            var response = await _usersWriteService.UpdateUserAsync(user);
+
+            if (response.Status == ResponseStatus.Failed)
+                return BadRequest();
+            else if (response.Status == ResponseStatus.Unauthorized)
+                return Unauthorized();
+
+            return Ok(user.Picture);
         }
 
         private async Task<dynamic> GenerateJwT(TravelUser user)
@@ -229,10 +260,10 @@ namespace TravelPlanner.Presentation.Controllers
 
             var picture = user.Picture ?? "";
             var claims = new[]
-           {
+            {
               new Claim(JwtRegisteredClaimNames.Sub, user.Email),
               new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-              new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
+              new Claim(JwtRegisteredClaimNames.UniqueName, user.Email),
               new Claim("picture", picture),
               new Claim("roles",  string.Join(",",roles))
             };

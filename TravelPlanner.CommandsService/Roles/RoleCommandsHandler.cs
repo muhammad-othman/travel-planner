@@ -28,9 +28,9 @@ namespace TravelPlanner.CommandsServices.Roles
             UserRole role = _repo.CreateRole(request.Data);
             var response = new RoleCommandResponse(role);
             if (role != null)
-                response.Result = Result.Succeeded;
+                response.Status = ResponseStatus.Succeeded;
             else
-                response.Result = Result.Failed;
+                response.Status = ResponseStatus.Failed;
 
             return Task.FromResult(response);
         }
@@ -40,9 +40,9 @@ namespace TravelPlanner.CommandsServices.Roles
             UserRole role = _repo.UpdateRole(request.Data);
             var response = new RoleCommandResponse(role);
             if (role != null)
-                response.Result = Result.Succeeded;
+                response.Status = ResponseStatus.Succeeded;
             else
-                response.Result = Result.Failed;
+                response.Status = ResponseStatus.Failed;
 
             return Task.FromResult(response);
         }
@@ -52,9 +52,9 @@ namespace TravelPlanner.CommandsServices.Roles
             UserRole role = _repo.DeleteRole(request.RoleId);
             var response = new RoleCommandResponse(role);
             if (role != null)
-                response.Result = Result.Succeeded;
+                response.Status = ResponseStatus.Succeeded;
             else
-                response.Result = Result.Failed;
+                response.Status = ResponseStatus.Failed;
 
             return Task.FromResult(response);
         }

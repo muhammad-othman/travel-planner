@@ -4,8 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TravelPlanner.Presentation.Model.Entities;
 using TravelPlanner.Presentation.ViewModels;
+using TravelPlanner.Shared.Entities;
 
 namespace TravelPlanner.Presentation.Model
 {

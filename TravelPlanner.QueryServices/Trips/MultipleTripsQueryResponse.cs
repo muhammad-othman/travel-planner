@@ -8,12 +8,14 @@ namespace TravelPlanner.QueryServices.Trips
 {
     public class MultipleTripsQueryResponse
     {
-        public Result Result { get; set; }
+        public ResponseStatus Status { get; set; }
         public ICollection<string> Errors { get; set; }
         public ICollection<Trip> Trips { get; }
+        public int TotalCount { get; set; }
 
-        public MultipleTripsQueryResponse(ICollection<Trip> trips)
+        public MultipleTripsQueryResponse(ICollection<Trip> trips, int totalCount)
         {
+            TotalCount = totalCount;
             Errors = new List<string>();
             Trips = trips;
         }

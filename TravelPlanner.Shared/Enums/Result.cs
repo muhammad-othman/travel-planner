@@ -4,7 +4,7 @@ using System.Text;
 
 namespace TravelPlanner.Shared.Enums
 {
-    public enum Result
+    public enum ResponseStatus
     {
         Succeeded, Failed, Unauthorized
     }

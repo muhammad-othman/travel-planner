@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using TravelPlanner.Shared.Enums;
 using TravelPlanner.Shared.Entities;
 using TravelPlanner.Shared.IRepos;
+using System.Linq;
 
 namespace TravelPlanner.QueryServices.Trips
 {
@@ -26,11 +27,16 @@ namespace TravelPlanner.QueryServices.Trips
         public Task<MultipleTripsQueryResponse> Handle(GetAllTripsQuery request, CancellationToken cancellationToken)
         {
             ICollection<Trip> trips = _repo.GetAllTrips(request.From, request.To, request.Destination);
-            var response = new MultipleTripsQueryResponse(trips);
+
+            int totalCount = trips.Count;
+            if (request.PageIndex.HasValue && request.PageSize.HasValue)
+                trips = trips.Skip((request.PageIndex.Value - 1) * request.PageSize.Value).Take(request.PageSize.Value).ToList();
+
+            var response = new MultipleTripsQueryResponse(trips,totalCount);
             if (trips != null)
-                response.Result = Result.Succeeded;
+                response.Status = ResponseStatus.Succeeded;
             else
-                response.Result = Result.Failed;
+                response.Status = ResponseStatus.Failed;
 
             return Task.FromResult(response);
         }
@@ -38,11 +44,16 @@ namespace TravelPlanner.QueryServices.Trips
         public Task<MultipleTripsQueryResponse> Handle(GetUserTripsQuery request, CancellationToken cancellationToken)
         {
             ICollection<Trip> trips = _repo.GetUserTrips(request.UserId, request.From, request.To, request.Destination);
-            var response = new MultipleTripsQueryResponse(trips);
+
+            int totalCount = trips.Count;
+            if (request.PageIndex.HasValue && request.PageSize.HasValue)
+                trips = trips.Skip((request.PageIndex.Value - 1) * request.PageSize.Value).Take(request.PageSize.Value).ToList();
+
+            var response = new MultipleTripsQueryResponse(trips,totalCount);
             if (trips != null)
-                response.Result = Result.Succeeded;
+                response.Status = ResponseStatus.Succeeded;
             else
-                response.Result = Result.Failed;
+                response.Status = ResponseStatus.Failed;
 
             return Task.FromResult(response);
         }
@@ -52,9 +63,9 @@ namespace TravelPlanner.QueryServices.Trips
             Trip trip = _repo.GetTripById(request.TripId);
             var response = new SingleTripQueryResponse(trip);
             if (trip != null)
-                response.Result = Result.Succeeded;
+                response.Status = ResponseStatus.Succeeded;
             else
-                response.Result = Result.Failed;
+                response.Status = ResponseStatus.Failed;
 
             return Task.FromResult(response);
         }

@@ -8,11 +8,10 @@ using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using TravelPlanner.Presentation.ViewModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Cors;
-using TravelPlanner.Shared.IRepos;
 using TravelPlanner.Shared.Entities;
 using TravelPlanner.CommandsServices.Trips;
 using TravelPlanner.QueryServices.Trips;
+using TravelPlanner.Shared.Enums;
 
 namespace TravelPlanner.Presentation.Controllers
 {
@@ -39,10 +38,19 @@ namespace TravelPlanner.Presentation.Controllers
             try
             {
                 var user = await _userManager.FindByEmailAsync(User.Identity.Name);
-                TripViewModel Trip= _mapper.Map<TripViewModel>(_tripsReadService.GetTripById(user,id).Result.Trip);
+                var result = await _tripsReadService.GetTripById(user,id);
+
+                if (result.Status == ResponseStatus.Unauthorized)
+                    return Unauthorized();
+                if (result.Status == ResponseStatus.Failed)
+                    return BadRequest();
+
+                TripViewModel Trip = _mapper.Map<TripViewModel>(result.Trip);
+
                 var roles = await _userManager.GetRolesAsync(user);
-                    if (Trip.UserEmail != user.Email && !roles.Contains("admin"))
+                if (Trip.UserEmail != user.Email && !roles.Contains("admin"))
                     return NotFound();
+
                 return Ok(Trip);
             }
             catch (Exception ex)
@@ -58,20 +66,14 @@ namespace TravelPlanner.Presentation.Controllers
                 var user = await _userManager.FindByEmailAsync(User.Identity.Name);
                 if (!alltrips)
                 {
-                    IEnumerable<TripViewModel> Trips = _tripsReadService.GetUserTrips(user,user.Id, from, to, destination).Result.Trips.Select(_mapper.Map<TripViewModel>).OrderByDescending(e => e.StartDate);
-                    int totalCount = Trips.Count();
-                    Trips = Trips.Skip((pageIndex - 1) * pageSize).Take(pageSize);
-                    return Ok(new { Trips, totalCount });
+                    return await GetUserTrips(pageIndex, pageSize, from, to, destination, user);
                 }
                 else
                 {
                     var roles = await _userManager.GetRolesAsync(user);
                     if (!roles.Contains("admin"))
                         return Unauthorized();
-                    IEnumerable<TripViewModel> Trips = _tripsReadService.GetAllTrips(user,from, to, destination).Result.Trips.Select(_mapper.Map<TripViewModel>).OrderByDescending(e => e.StartDate);
-                    int totalCount = Trips.Count();
-                    Trips = Trips.Skip((pageIndex - 1) * pageSize).Take(pageSize);
-                    return Ok(new { Trips, totalCount });
+                    return await GetAllTrips(pageIndex, pageSize, from, to, destination, user);
                 }
             }
             catch (Exception ex)
@@ -79,6 +81,33 @@ namespace TravelPlanner.Presentation.Controllers
                 return BadRequest(ex);
             }
         }
+
+        private async Task<IActionResult> GetAllTrips(int pageIndex, int pageSize, DateTime? from, DateTime? to, string destination, TravelUser user)
+        {
+            var result = await _tripsReadService.GetAllTrips(user, from, to, destination, pageIndex, pageSize);
+
+            if (result.Status == ResponseStatus.Unauthorized)
+                return Unauthorized();
+            if (result.Status == ResponseStatus.Failed)
+                return BadRequest();
+
+            IEnumerable<TripViewModel> Trips = result.Trips.Select(_mapper.Map<TripViewModel>);
+            return Ok(new { Trips, result.TotalCount });
+        }
+
+        private async Task<IActionResult> GetUserTrips(int pageIndex, int pageSize, DateTime? from, DateTime? to, string destination, TravelUser user)
+        {
+            var result = await _tripsReadService.GetUserTrips(user, user.Id, from, to, destination, pageIndex, pageSize);
+
+            if (result.Status == ResponseStatus.Unauthorized)
+                return Unauthorized();
+            if (result.Status == ResponseStatus.Failed)
+                return BadRequest();
+
+            IEnumerable<TripViewModel> Trips = result.Trips.Select(_mapper.Map<TripViewModel>);
+            return Ok(new { Trips, result.TotalCount });
+        }
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody]TripViewModel trip)
         {
@@ -87,12 +116,16 @@ namespace TravelPlanner.Presentation.Controllers
             try
             {
                 var user = await _userManager.FindByEmailAsync(User.Identity.Name);
-                var t = _mapper.Map<Trip>(trip);
-                t.TravelUserId = user.Id;
-                var createdTrip = _tripsWriteService.CreateTripAsync(user, t).Result.Trip;
-                if (createdTrip != null)
-                    return Ok(createdTrip);
-                return BadRequest();
+                var mappedTrip = _mapper.Map<Trip>(trip);
+                mappedTrip.TravelUserId = user.Id;
+
+                var result = await _tripsWriteService.CreateTripAsync(user, mappedTrip);
+
+                if (result.Status == ResponseStatus.Unauthorized)
+                    return Unauthorized();
+                if (result.Status == ResponseStatus.Failed)
+                    return BadRequest();
+                return Ok(_mapper.Map<TripViewModel>(result.Trip));
             }
             catch (Exception ex)
             {
@@ -110,12 +143,14 @@ namespace TravelPlanner.Presentation.Controllers
                 var roles = await _userManager.GetRolesAsync(user);
                 if (trip.UserEmail != user.Email && !roles.Contains("admin"))
                     return NotFound();
-                trip.Id = id;
-                var updatedTrip = _tripsWriteService.UpdateTripAsync(user, _mapper.Map<Trip>(trip)).Result.Trip; 
-                if (updatedTrip == null)
-                    return NotFound();
 
-                return Ok(Mapper.Map<TripViewModel>(updatedTrip));
+                var result = await _tripsWriteService.UpdateTripAsync(user, _mapper.Map<Trip>(trip));
+
+                if (result.Status == ResponseStatus.Unauthorized)
+                    return Unauthorized();
+                if (result.Status == ResponseStatus.Failed)
+                    return BadRequest();
+                return Ok(_mapper.Map<TripViewModel>(result.Trip));
             }
             catch (Exception)
             {
@@ -128,13 +163,13 @@ namespace TravelPlanner.Presentation.Controllers
             try
             {
                 var user = await _userManager.FindByEmailAsync(User.Identity.Name);
-                TripViewModel trip = _mapper.Map<TripViewModel>(_tripsReadService.GetTripById(user,id));
-                var roles = await _userManager.GetRolesAsync(user);
-                if (trip.UserEmail != user.Email && !roles.Contains("admin"))
-                    return NotFound();
-                var deleted = _tripsWriteService.UpdateTripAsync(user, _mapper.Map<Trip>(trip)).Result.Trip;
-                if (deleted == null)
-                    return NotFound();
+
+                var result = await _tripsWriteService.DeleteTripAsync(user, id);
+
+                if (result.Status == ResponseStatus.Unauthorized)
+                    return Unauthorized();
+                if (result.Status == ResponseStatus.Failed)
+                    return BadRequest();
                 return NoContent();
             }
             catch (Exception)

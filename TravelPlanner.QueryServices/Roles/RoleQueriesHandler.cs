@@ -28,9 +28,9 @@ namespace TravelPlanner.QueryServices.Roles
             ICollection<UserRole> roles = _repo.GetAllRoles();
             var response = new MultipleRolesQueryResponse(roles);
             if (roles != null)
-                response.Result = Result.Succeeded;
+                response.Status = ResponseStatus.Succeeded;
             else
-                response.Result = Result.Failed;
+                response.Status = ResponseStatus.Failed;
 
             return Task.FromResult(response);
         }
@@ -40,9 +40,9 @@ namespace TravelPlanner.QueryServices.Roles
             UserRole role = _repo.GetRoleByName(request.Name);
             var response = new SingleRoleQueryResponse(role);
             if (role != null)
-                response.Result = Result.Succeeded;
+                response.Status = ResponseStatus.Succeeded;
             else
-                response.Result = Result.Failed;
+                response.Status = ResponseStatus.Failed;
 
             return Task.FromResult(response);
         }
@@ -52,9 +52,9 @@ namespace TravelPlanner.QueryServices.Roles
             UserRole role = _repo.GetRoleById(request.RoleId);
             var response = new SingleRoleQueryResponse(role);
             if (role != null)
-                response.Result = Result.Succeeded;
+                response.Status = ResponseStatus.Succeeded;
             else
-                response.Result = Result.Failed;
+                response.Status = ResponseStatus.Failed;
 
             return Task.FromResult(response);
         }

@@ -27,7 +27,7 @@ namespace TravelPlanner.Presentation.IdentityCustomeStores
         public async Task<IdentityResult> CreateAsync(UserRole role, CancellationToken cancellationToken)
         {
             var result = await _rolesWriteService.CreateRoleAsync(role);
-            if (result.Result == Result.Succeeded)
+            if (result.Status == ResponseStatus.Succeeded)
                 return IdentityResult.Success;
             return IdentityResult.Failed();
         }
@@ -35,7 +35,7 @@ namespace TravelPlanner.Presentation.IdentityCustomeStores
         public async Task<IdentityResult> DeleteAsync(UserRole role, CancellationToken cancellationToken)
         {
             var result = await _rolesWriteService.DeleteRoleAsync(role.Id);
-            if (result.Result == Result.Succeeded)
+            if (result.Status == ResponseStatus.Succeeded)
                 return IdentityResult.Success;
             return IdentityResult.Failed();
         }
@@ -49,7 +49,7 @@ namespace TravelPlanner.Presentation.IdentityCustomeStores
         public async Task<UserRole> FindByIdAsync(string roleId, CancellationToken cancellationToken)
         {
             var result = await _rolesReadService.GetRoleById(roleId);
-            if (result.Result == Result.Succeeded)
+            if (result.Status == ResponseStatus.Succeeded)
                 return result.Role;
             return null;
         }
@@ -59,7 +59,7 @@ namespace TravelPlanner.Presentation.IdentityCustomeStores
         public async Task<UserRole> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
         {
             var result = await _rolesReadService.GetRoleByName(normalizedRoleName);
-            if (result.Result == Result.Succeeded)
+            if (result.Status == ResponseStatus.Succeeded)
                 return result.Role;
             return null;
         }
@@ -92,7 +92,7 @@ namespace TravelPlanner.Presentation.IdentityCustomeStores
         public async Task<IdentityResult> UpdateAsync(UserRole role, CancellationToken cancellationToken)
         {
             var result = await _rolesWriteService.UpdateRoleAsync(role);
-            if (result.Result == Result.Succeeded)
+            if (result.Status == ResponseStatus.Succeeded)
                 return IdentityResult.Success;
             return IdentityResult.Failed();
         }

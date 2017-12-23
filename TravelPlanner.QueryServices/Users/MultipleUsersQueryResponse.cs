@@ -8,12 +8,14 @@ namespace TravelPlanner.QueryServices.Users
 {
     public class MultipleUsersQueryResponse
     {
-        public Result Result { get; set; }
+        public ResponseStatus Status { get; set; }
         public ICollection<string> Errors { get; set; }
         public ICollection<TravelUser> Users { get; }
+        public int TotalCount { get; set; }
 
-        public MultipleUsersQueryResponse(ICollection<TravelUser> users)
+        public MultipleUsersQueryResponse(ICollection<TravelUser> users, int totalCount)
         {
+            TotalCount = totalCount;
             Errors = new List<string>();
             Users = users;
         }

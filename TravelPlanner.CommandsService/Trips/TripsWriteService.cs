@@ -28,11 +28,10 @@ namespace TravelPlanner.CommandsServices.Trips
             return await _mediator.Send(command);
         }
 
-        public async Task<TripCommandResponse> DeleteTripAsync(TravelUser user, int TripId)
+        public async Task<TripCommandResponse> DeleteTripAsync(TravelUser user, int tripId)
         {
-            var command = new DeleteTripCommand(user,TripId);
+            var command = new DeleteTripCommand(user, tripId);
             return await _mediator.Send(command);
         }
-
     }
 }

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using TravelPlanner.Shared.Entities;
 using TravelPlanner.Shared.Enums;
 using TravelPlanner.Shared.IRepos;
+using System.Linq;
 
 namespace TravelPlanner.QueryServices.Users
 {
@@ -26,11 +27,17 @@ namespace TravelPlanner.QueryServices.Users
         public Task<MultipleUsersQueryResponse> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
         {
             ICollection<TravelUser> users = _repo.GetAllUsers();
-            var response = new MultipleUsersQueryResponse(users);
+            int totalCount = users.Count;
+
+            if(request.PageIndex.HasValue && request.PageSize.HasValue)
+                users = users.Skip((request.PageIndex.Value- 1) * request.PageSize.Value).Take(request.PageSize.Value).ToList();
+
+            var response = new MultipleUsersQueryResponse(users,totalCount);
+
             if (users != null)
-                response.Result = Result.Succeeded;
+                response.Status = ResponseStatus.Succeeded;
             else
-                response.Result = Result.Failed;
+                response.Status = ResponseStatus.Failed;
 
             return Task.FromResult(response);
         }
@@ -40,9 +47,9 @@ namespace TravelPlanner.QueryServices.Users
             TravelUser user = _repo.GetUserByEmail(request.Email);
             var response = new SingleUserQueryResponse(user);
             if (user != null)
-                response.Result = Result.Succeeded;
+                response.Status = ResponseStatus.Succeeded;
             else
-                response.Result = Result.Failed;
+                response.Status = ResponseStatus.Failed;
 
             return Task.FromResult(response);
         }
@@ -52,9 +59,9 @@ namespace TravelPlanner.QueryServices.Users
             TravelUser user = _repo.GetUserById(request.UserId);
             var response = new SingleUserQueryResponse(user);
             if (user != null)
-                response.Result = Result.Succeeded;
+                response.Status = ResponseStatus.Succeeded;
             else
-                response.Result = Result.Failed;
+                response.Status = ResponseStatus.Failed;
 
             return Task.FromResult(response);
         }

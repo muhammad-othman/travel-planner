@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using AutoMapper;
-using TravelPlanner.Presentation.Model.Repositories.IRepositories;
 using TravelPlanner.Presentation.ViewModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Net;
@@ -14,6 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using TravelPlanner.Shared.Entities;
 using TravelPlanner.QueryServices.Users;
 using TravelPlanner.CommandsServices.Users;
+using TravelPlanner.Shared.Enums;
 
 namespace TravelPlanner.Presentation.Controllers
 {
@@ -46,7 +46,7 @@ namespace TravelPlanner.Presentation.Controllers
             return "user";
         }
 
-        UserViewModel MapToVM(TravelUser user)
+        UserViewModel MapToUserToUserVM(TravelUser user)
         {
             var vm =  _mapper.Map<UserViewModel>(user);
             vm.Role = GetUserRoles(user);
@@ -54,11 +54,11 @@ namespace TravelPlanner.Presentation.Controllers
         }
 
 
-        public async Task<IActionResult> GetById(string id)
+        public IActionResult GetById(string id)
         {
             try
             {
-                UserViewModel user = MapToVM(_usersReadService.GetUserById(id).Result.User);
+                UserViewModel user = MapToUserToUserVM(_usersReadService.GetUserById(id).Result.User);
                 return Ok(user);
             }
             catch (Exception)
@@ -72,10 +72,14 @@ namespace TravelPlanner.Presentation.Controllers
             try
             {
                 var currentUser = await _userManager.FindByEmailAsync(User.Identity.Name);
-                IEnumerable<UserViewModel> users = _usersReadService.GetAllUsers(currentUser, email).Result.Users.Select(MapToVM).OrderByDescending(e => e.CreationDate);
-                    int totalCount = users.Count();
-                    users = users.Skip((pageIndex - 1) * pageSize).Take(pageSize);
-                    return Ok(new { users, totalCount });
+                var result = await _usersReadService.GetAllUsersAsync(currentUser, email, pageIndex,pageSize);
+                if (result.Status == ResponseStatus.Unauthorized)
+                    return Unauthorized();
+                if (result.Status == ResponseStatus.Failed)
+                    return BadRequest();
+
+                IEnumerable<UserViewModel> users = result.Users.Select(MapToUserToUserVM).OrderByDescending(e => e.CreationDate);
+                return Ok(new { users, result.TotalCount });
             }
             catch (Exception)
             {
@@ -88,15 +92,25 @@ namespace TravelPlanner.Presentation.Controllers
             if (!ModelState.IsValid) return BadRequest();
             try
             {
-                //var editor = await _userManager.FindByEmailAsync(User.Identity.Name);
-                //var roles = await _userManager.GetRolesAsync(editor);
-                //if (user.Role == "admin" &&  !roles.Contains("admin"))
-                //    return Unauthorized();
-                //var updatedUser = _usersWriteService.UpdateUserAsync(user);
-                //if (updatedUser == null)
+                var editor = await _userManager.FindByEmailAsync(User.Identity.Name);
+                var roles = await _userManager.GetRolesAsync(editor);
+                if (user.Role == "admin" && !roles.Contains("admin"))
+                    return Unauthorized();
+
+               
+                var result = await _usersWriteService.UpdateUserAsync(_mapper.Map<TravelUser>(user));
+
+                if (result.Status == ResponseStatus.Unauthorized)
+                    return Unauthorized();
+                if (result.Status == ResponseStatus.Failed)
+                    return BadRequest();
+
+                var updatedUser = result.User;
+
+                if (updatedUser == null)
                     return NotFound();
 
-                //return Ok(updatedUser);
+                return Ok(MapToUserToUserVM(updatedUser));
             }
             catch (Exception)
             {
@@ -108,7 +122,7 @@ namespace TravelPlanner.Presentation.Controllers
         {
             try
             {
-                UserViewModel user = MapToVM(_usersReadService.GetUserById(id).Result.User);
+                UserViewModel user = MapToUserToUserVM(_usersReadService.GetUserById(id).Result.User);
                 var editor = await _userManager.FindByEmailAsync(User.Identity.Name);
 
                 if (user.Id == editor.Id)
@@ -117,9 +131,13 @@ namespace TravelPlanner.Presentation.Controllers
                 if (user.Role == "admin" && !roles.Contains("admin"))
                     return Unauthorized();
 
-                var deleted = _usersWriteService.DeleteUserAsync(id).Result.User;
-                if (deleted == null)
-                    return NotFound();
+                var result = await _usersWriteService.DeleteUserAsync(id);
+
+                if (result.Status == ResponseStatus.Unauthorized)
+                    return Unauthorized();
+                if (result.Status == ResponseStatus.Failed)
+                    return BadRequest();
+
                 return NoContent();
             }
             catch (Exception)

@@ -8,7 +8,7 @@ namespace TravelPlanner.CommandsServices.Users
 {
     public class UserCommandResponse
     {
-        public Result Result { get; set; }
+        public ResponseStatus Status { get; set; }
 
         public ICollection<string> Errors { get; set; }
         public TravelUser User { get; }

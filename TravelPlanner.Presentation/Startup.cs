@@ -19,8 +19,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using TravelPlanner.Presentation.Services;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
-using TravelPlanner.Presentation.Model.Repositories.IRepositories;
-using TravelPlanner.Presentation.Model.Repositories;
 using TravelPlanner.Shared.Entities;
 using TravelPlanner.Presentation.IdentityCustomeStores;
 using TravelPlanner.QueryServices.Roles;
@@ -78,8 +76,6 @@ namespace TravelPlanner.Presentation
 
 
             services.AddTransient<IEmailSender, EmailSender>();
-            services.AddTransient<ITripRepository, TripRepository>();
-            services.AddTransient<ITravelUserRepository, TravelUserRepository>();
 
             AddServices(services);
 
@@ -97,6 +93,9 @@ namespace TravelPlanner.Presentation
 
         private void AddServices(IServiceCollection services)
         {
+            services.AddScoped<SingleInstanceFactory>(p => p.GetRequiredService);
+            services.AddScoped<MultiInstanceFactory>(sp => t => sp.GetServices(t));
+
             services.AddScoped(typeof(IRolesReadService), typeof(RolesReadService));
             services.AddScoped(typeof(IUsersReadService), typeof(UsersReadService));
             services.AddScoped(typeof(ITripsReadService), typeof(TripsReadService));

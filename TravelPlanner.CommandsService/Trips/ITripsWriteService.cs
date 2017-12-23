@@ -6,7 +6,7 @@ namespace TravelPlanner.CommandsServices.Trips
     public interface ITripsWriteService
     {
         Task<TripCommandResponse> CreateTripAsync(TravelUser user, Trip trip);
-        Task<TripCommandResponse> DeleteTripAsync(TravelUser user, int TripId);
+        Task<TripCommandResponse> DeleteTripAsync(TravelUser user, int tripId);
         Task<TripCommandResponse> UpdateTripAsync(TravelUser user, Trip trip);
     }
 }
