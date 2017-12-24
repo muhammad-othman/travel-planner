@@ -9,7 +9,6 @@ namespace TravelPlanner.Persistence
 
         public TravelPlannerContext(DbContextOptions<TravelPlannerContext> options) : base(options)
         {
-
         }
         public DbSet<TravelUser> Users { get; set; }
         public DbSet<UserRole> Roles { get; set; }

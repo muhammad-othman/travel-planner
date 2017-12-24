@@ -115,10 +115,15 @@ namespace TravelPlanner.Presentation
 
             var builder = new DbContextOptionsBuilder<TravelPlannerContext>();
             var connectionString = _conf.GetConnectionString("TravelPlannerConnectionString");
-            builder.UseSqlServer(connectionString);
+            string assemblyName = typeof(Startup).Namespace;
 
-            services.AddSingleton<TravelPlannerContext, TravelPlannerContext>(e => new TravelPlannerContext(builder.Options));
+            services.AddDbContext<TravelPlannerContext>(options =>
+               options.UseSqlServer(connectionString,
+                   optionsBuilder =>
+                       optionsBuilder.MigrationsAssembly(assemblyName)
+               ));
 
+        
             services.Scan(scan => scan
                 .FromAssembliesOf(typeof(RoleCommandsHandler))
                 .AddClasses()
@@ -168,10 +173,10 @@ namespace TravelPlanner.Presentation
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                using (var scope = app.ApplicationServices.CreateScope())
-                {
-                    scope.ServiceProvider.GetService<DBSeeder>().Seed().Wait();
-                }
+                //using (var scope = app.ApplicationServices.CreateScope())
+                //{
+                //    scope.ServiceProvider.GetService<DBSeeder>().Seed().Wait();
+                //}
             }
             app.UseAuthentication();
 

@@ -15,7 +15,8 @@ namespace TravelPlanner.Presentation.IdentityCustomeStores
                          IUserLoginStore<TravelUser>,
                          IUserRoleStore<TravelUser>,
                          IUserPasswordStore<TravelUser>,
-                         IUserSecurityStampStore<TravelUser>
+                         IUserSecurityStampStore<TravelUser>,
+                         IUserEmailStore<TravelUser>
     {
         private readonly IUsersReadService _usersReadService;
         private readonly IUsersWriteService _usersWriteService;
@@ -176,6 +177,44 @@ namespace TravelPlanner.Presentation.IdentityCustomeStores
             if (result.Status == ResponseStatus.Succeeded)
                 return IdentityResult.Success;
             return IdentityResult.Failed();
+        }
+
+        public Task SetEmailAsync(TravelUser user, string email, CancellationToken cancellationToken)
+        {
+            return Task.Run(() => user.Email = email);
+        }
+
+        public Task<string> GetEmailAsync(TravelUser user, CancellationToken cancellationToken)
+        {
+            return Task.Run(() => user.Email);
+        }
+
+        public Task<bool> GetEmailConfirmedAsync(TravelUser user, CancellationToken cancellationToken)
+        {
+            return Task.Run(() => user.EmailConfirmed);
+        }
+
+        public Task SetEmailConfirmedAsync(TravelUser user, bool confirmed, CancellationToken cancellationToken)
+        {
+            return Task.Run(() => user.EmailConfirmed = confirmed);
+        }
+
+        public async Task<TravelUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
+        {
+            var result = await _usersReadService.GetUserByEmail(normalizedEmail);
+            if (result.Status == ResponseStatus.Succeeded)
+                return result.User;
+            return null;
+        }
+
+        public Task<string> GetNormalizedEmailAsync(TravelUser user, CancellationToken cancellationToken)
+        {
+            return Task.Run(() => user.NormalizedEmail);
+        }
+
+        public Task SetNormalizedEmailAsync(TravelUser user, string normalizedEmail, CancellationToken cancellationToken)
+        {
+            return Task.Run(() => user.NormalizedEmail = normalizedEmail);
         }
     }
 }
