@@ -20,7 +20,7 @@ namespace TravelPlanner.Presentation
         {
             IConfigurationRoot configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("config.json")
+                .AddJsonFile("appsettings.json")
                 .Build();
             var builder = new DbContextOptionsBuilder<TravelPlannerContext>();
             var connectionString = configuration.GetConnectionString("TravelPlannerConnectionString");
@@ -49,7 +49,7 @@ namespace TravelPlanner.Presentation
             // Removing the default configuration options
             builder.Sources.Clear();
 
-            builder.AddJsonFile("config.json", false, true)
+            builder.AddJsonFile("appsettings.json", false, true)
                    .AddEnvironmentVariables();
         }
     }
