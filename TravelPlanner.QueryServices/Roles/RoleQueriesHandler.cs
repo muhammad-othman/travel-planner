@@ -8,13 +8,15 @@ using System.Threading.Tasks;
 using TravelPlanner.Shared.Entities;
 using TravelPlanner.Shared.Enums;
 using TravelPlanner.Shared.IRepos;
+using TravelPlanner.Shared;
 
 namespace TravelPlanner.QueryServices.Roles
 {
-    public class RoleQueriesHandler :
+    public class RoleQueriesHandler : BaseHandler,
         IRequestHandler<GetAllRolesQuery, MultipleRolesQueryResponse>,
         IRequestHandler<GetRoleByNameQuery, SingleRoleQueryResponse>,
         IRequestHandler<GetRoleByIdQuery, SingleRoleQueryResponse>
+        
     {
         private readonly IRolesReadRepo _repo;
 
@@ -27,11 +29,7 @@ namespace TravelPlanner.QueryServices.Roles
         {
             ICollection<UserRole> roles = _repo.GetAllRoles();
             var response = new MultipleRolesQueryResponse(roles);
-            if (roles != null)
-                response.Status = ResponseStatus.Succeeded;
-            else
-                response.Status = ResponseStatus.Failed;
-
+            response.Status = GetResponseStatus(roles);
             return Task.FromResult(response);
         }
 
@@ -39,11 +37,7 @@ namespace TravelPlanner.QueryServices.Roles
         {
             UserRole role = _repo.GetRoleByName(request.Name);
             var response = new SingleRoleQueryResponse(role);
-            if (role != null)
-                response.Status = ResponseStatus.Succeeded;
-            else
-                response.Status = ResponseStatus.Failed;
-
+            response.Status = GetResponseStatus(role);
             return Task.FromResult(response);
         }
 
@@ -51,11 +45,7 @@ namespace TravelPlanner.QueryServices.Roles
         {
             UserRole role = _repo.GetRoleById(request.RoleId);
             var response = new SingleRoleQueryResponse(role);
-            if (role != null)
-                response.Status = ResponseStatus.Succeeded;
-            else
-                response.Status = ResponseStatus.Failed;
-
+            response.Status = GetResponseStatus(role);
             return Task.FromResult(response);
         }
     }

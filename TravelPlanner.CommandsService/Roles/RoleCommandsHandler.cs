@@ -6,13 +6,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using TravelPlanner.CommandsServices.Roles;
 using TravelPlanner.CommandsServices.Roles.Commands;
+using TravelPlanner.Shared;
 using TravelPlanner.Shared.Entities;
 using TravelPlanner.Shared.Enums;
 using TravelPlanner.Shared.IRepos;
 
 namespace TravelPlanner.CommandsServices.Roles
 {
-    public class RoleCommandsHandler : 
+    public class RoleCommandsHandler : BaseHandler,
         IRequestHandler<CreateRoleCommand, RoleCommandResponse>, 
         IRequestHandler<DeleteRoleCommand, RoleCommandResponse>, 
         IRequestHandler<UpdateRoleCommand, RoleCommandResponse>
@@ -27,11 +28,7 @@ namespace TravelPlanner.CommandsServices.Roles
         {
             UserRole role = _repo.CreateRole(request.Data);
             var response = new RoleCommandResponse(role);
-            if (role != null)
-                response.Status = ResponseStatus.Succeeded;
-            else
-                response.Status = ResponseStatus.Failed;
-
+            response.Status = GetResponseStatus(role);
             return Task.FromResult(response);
         }
 
@@ -39,11 +36,7 @@ namespace TravelPlanner.CommandsServices.Roles
         {
             UserRole role = _repo.UpdateRole(request.Data);
             var response = new RoleCommandResponse(role);
-            if (role != null)
-                response.Status = ResponseStatus.Succeeded;
-            else
-                response.Status = ResponseStatus.Failed;
-
+            response.Status = GetResponseStatus(role);
             return Task.FromResult(response);
         }
 
@@ -51,11 +44,7 @@ namespace TravelPlanner.CommandsServices.Roles
         {
             UserRole role = _repo.DeleteRole(request.RoleId);
             var response = new RoleCommandResponse(role);
-            if (role != null)
-                response.Status = ResponseStatus.Succeeded;
-            else
-                response.Status = ResponseStatus.Failed;
-
+            response.Status = GetResponseStatus(role);
             return Task.FromResult(response);
         }
     }

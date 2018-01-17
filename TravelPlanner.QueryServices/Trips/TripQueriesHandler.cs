@@ -9,10 +9,11 @@ using TravelPlanner.Shared.Enums;
 using TravelPlanner.Shared.Entities;
 using TravelPlanner.Shared.IRepos;
 using System.Linq;
+using TravelPlanner.Shared;
 
 namespace TravelPlanner.QueryServices.Trips
 {
-    public class TripQueriesHandler :
+    public class TripQueriesHandler : BaseHandler,
         IRequestHandler<GetAllTripsQuery, MultipleTripsQueryResponse>,
         IRequestHandler<GetUserTripsQuery, MultipleTripsQueryResponse>,
         IRequestHandler<GetTripByIdQuery, SingleTripQueryResponse>
@@ -33,11 +34,7 @@ namespace TravelPlanner.QueryServices.Trips
                 trips = trips.Skip((request.PageIndex.Value - 1) * request.PageSize.Value).Take(request.PageSize.Value).ToList();
 
             var response = new MultipleTripsQueryResponse(trips,totalCount);
-            if (trips != null)
-                response.Status = ResponseStatus.Succeeded;
-            else
-                response.Status = ResponseStatus.Failed;
-
+            response.Status = GetResponseStatus(trips);
             return Task.FromResult(response);
         }
 
@@ -50,11 +47,7 @@ namespace TravelPlanner.QueryServices.Trips
                 trips = trips.Skip((request.PageIndex.Value - 1) * request.PageSize.Value).Take(request.PageSize.Value).ToList();
 
             var response = new MultipleTripsQueryResponse(trips,totalCount);
-            if (trips != null)
-                response.Status = ResponseStatus.Succeeded;
-            else
-                response.Status = ResponseStatus.Failed;
-
+            response.Status = GetResponseStatus(trips);
             return Task.FromResult(response);
         }
 
@@ -62,11 +55,7 @@ namespace TravelPlanner.QueryServices.Trips
         {
             Trip trip = _repo.GetTripById(request.TripId);
             var response = new SingleTripQueryResponse(trip);
-            if (trip != null)
-                response.Status = ResponseStatus.Succeeded;
-            else
-                response.Status = ResponseStatus.Failed;
-
+            response.Status = GetResponseStatus(trip);
             return Task.FromResult(response);
         }
     }

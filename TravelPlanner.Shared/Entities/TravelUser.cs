@@ -8,7 +8,6 @@ namespace TravelPlanner.Shared.Entities
         public TravelUser()
         {
             Trips = new List<Trip>();
-            Roles = new List<UserRole>();
         }
         public virtual string Id { get; set; }
         public virtual string Email { get; set; }
@@ -23,6 +22,6 @@ namespace TravelPlanner.Shared.Entities
         public virtual bool LockoutEnabled { get; set; }
         public virtual int AccessFailedCount { get; set; }
         public ICollection<Trip> Trips { get; set; }
-        public ICollection<UserRole> Roles { get; set; }
+        public string Role { get; set; }
     }
 }

@@ -9,10 +9,11 @@ using TravelPlanner.Shared.Entities;
 using TravelPlanner.Shared.Enums;
 using TravelPlanner.Shared.IRepos;
 using System.Linq;
+using TravelPlanner.Shared;
 
 namespace TravelPlanner.QueryServices.Users
 {
-    public class UserQueriesHandler :
+    public class UserQueriesHandler : BaseHandler,
         IRequestHandler<GetAllUsersQuery, MultipleUsersQueryResponse>,
         IRequestHandler<GetUserByEmailQuery, SingleUserQueryResponse>,
         IRequestHandler<GetUserByIdQuery, SingleUserQueryResponse>
@@ -33,12 +34,7 @@ namespace TravelPlanner.QueryServices.Users
                 users = users.Skip((request.PageIndex.Value- 1) * request.PageSize.Value).Take(request.PageSize.Value).ToList();
 
             var response = new MultipleUsersQueryResponse(users,totalCount);
-
-            if (users != null)
-                response.Status = ResponseStatus.Succeeded;
-            else
-                response.Status = ResponseStatus.Failed;
-
+            response.Status = GetResponseStatus(users);
             return Task.FromResult(response);
         }
 
@@ -46,11 +42,7 @@ namespace TravelPlanner.QueryServices.Users
         {
             TravelUser user = _repo.GetUserByEmail(request.Email);
             var response = new SingleUserQueryResponse(user);
-            if (user != null)
-                response.Status = ResponseStatus.Succeeded;
-            else
-                response.Status = ResponseStatus.Failed;
-
+            response.Status = GetResponseStatus(user);
             return Task.FromResult(response);
         }
 
@@ -58,11 +50,7 @@ namespace TravelPlanner.QueryServices.Users
         {
             TravelUser user = _repo.GetUserById(request.UserId);
             var response = new SingleUserQueryResponse(user);
-            if (user != null)
-                response.Status = ResponseStatus.Succeeded;
-            else
-                response.Status = ResponseStatus.Failed;
-
+            response.Status = GetResponseStatus(user);
             return Task.FromResult(response);
         }
     }

@@ -11,6 +11,7 @@ namespace TravelPlanner.Presentation.Model
 {
     public class MappingProfile : Profile
     {
+
         public MappingProfile()
         {
             CreateMap<Trip, TripViewModel>().
@@ -26,6 +27,8 @@ namespace TravelPlanner.Presentation.Model
 
             CreateMap<TravelUser, UserViewModel>().
                 ForMember(source => source.isLocked, u => u.MapFrom(s => s.LockoutEnd != null));
+
+            CreateMap<UserViewModel, TravelUser>();
 
         }
 

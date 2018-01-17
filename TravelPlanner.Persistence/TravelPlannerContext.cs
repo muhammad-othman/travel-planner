@@ -13,6 +13,6 @@ namespace TravelPlanner.Persistence
         public DbSet<TravelUser> Users { get; set; }
         public DbSet<UserRole> Roles { get; set; }
         public DbSet<Trip> Trips { get; set; }
-     
+
     }
 }

@@ -6,13 +6,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using TravelPlanner.CommandsServices.Users;
 using TravelPlanner.CommandsServices.Users.Commands;
+using TravelPlanner.Shared;
 using TravelPlanner.Shared.Entities;
 using TravelPlanner.Shared.Enums;
 using TravelPlanner.Shared.IRepos;
 
 namespace TravelPlanner.CommandsServices.Users
 {
-    public class UserCommandsHandler : 
+    public class UserCommandsHandler : BaseHandler,
         IRequestHandler<CreateUserCommand, UserCommandResponse>, 
         IRequestHandler<DeleteUserCommand, UserCommandResponse>, 
         IRequestHandler<UpdateUserCommand, UserCommandResponse>
@@ -27,11 +28,7 @@ namespace TravelPlanner.CommandsServices.Users
         {
             TravelUser user = _repo.CreateUser(request.Data);
             var response = new UserCommandResponse(user);
-            if (user != null)
-                response.Status = ResponseStatus.Succeeded;
-            else
-                response.Status = ResponseStatus.Failed;
-
+            response.Status = GetResponseStatus(user);
             return Task.FromResult(response);
         }
 
@@ -39,11 +36,7 @@ namespace TravelPlanner.CommandsServices.Users
         {
             TravelUser user = _repo.UpdateUser(request.Data);
             var response = new UserCommandResponse(user);
-            if (user != null)
-                response.Status = ResponseStatus.Succeeded;
-            else
-                response.Status = ResponseStatus.Failed;
-
+            response.Status = GetResponseStatus(user);
             return Task.FromResult(response);
         }
 
@@ -51,11 +44,7 @@ namespace TravelPlanner.CommandsServices.Users
         {
             TravelUser user = _repo.DeleteUser(request.UserId);
             var response = new UserCommandResponse(user);
-            if (user != null)
-                response.Status = ResponseStatus.Succeeded;
-            else
-                response.Status = ResponseStatus.Failed;
-
+            response.Status = GetResponseStatus(user);
             return Task.FromResult(response);
         }
     }

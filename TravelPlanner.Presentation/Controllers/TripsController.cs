@@ -12,6 +12,7 @@ using TravelPlanner.Shared.Entities;
 using TravelPlanner.CommandsServices.Trips;
 using TravelPlanner.QueryServices.Trips;
 using TravelPlanner.Shared.Enums;
+using AutoMapper;
 
 namespace TravelPlanner.Presentation.Controllers
 {

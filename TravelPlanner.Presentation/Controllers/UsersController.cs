@@ -97,8 +97,15 @@ namespace TravelPlanner.Presentation.Controllers
                 if (user.Role == "admin" && !roles.Contains("admin"))
                     return Unauthorized();
 
-               
-                var result = await _usersWriteService.UpdateUserAsync(_mapper.Map<TravelUser>(user));
+                var oldUser =_usersReadService.GetUserById(id).Result.User;
+                oldUser.EmailConfirmed = user.EmailConfirmed;
+                oldUser.Role = user.Role;
+                if (!user.isLocked)
+                    oldUser.LockoutEnd = null;
+                else
+                    oldUser.LockoutEnd = new DateTimeOffset(DateTime.Now, new TimeSpan(400, 0, 0, 0, 0));
+
+                var result = await _usersWriteService.UpdateUserAsync(oldUser);
 
                 if (result.Status == ResponseStatus.Unauthorized)
                     return Unauthorized();

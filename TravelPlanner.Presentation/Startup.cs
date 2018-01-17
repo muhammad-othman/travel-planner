@@ -31,6 +31,7 @@ using TravelPlanner.Shared.IRepos;
 using TravelPlanner.Persistence.Repos;
 using TravelPlanner.Persistence;
 using MediatR;
+using System.Threading;
 
 namespace TravelPlanner.Presentation
 {
@@ -122,8 +123,9 @@ namespace TravelPlanner.Presentation
                    optionsBuilder =>
                        optionsBuilder.MigrationsAssembly(assemblyName)
                ));
+            services.AddScoped(typeof(DBSeeder), typeof(DBSeeder));
 
-        
+
             services.Scan(scan => scan
                 .FromAssembliesOf(typeof(RoleCommandsHandler))
                 .AddClasses()
@@ -173,10 +175,10 @@ namespace TravelPlanner.Presentation
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                //using (var scope = app.ApplicationServices.CreateScope())
-                //{
-                //    scope.ServiceProvider.GetService<DBSeeder>().Seed().Wait();
-                //}
+                using (var scope = app.ApplicationServices.CreateScope())
+                {
+                    scope.ServiceProvider.GetService<DBSeeder>().Seed().Wait();
+                }
             }
             app.UseAuthentication();
 
@@ -185,4 +187,5 @@ namespace TravelPlanner.Presentation
         }
 
     }
+    
 }

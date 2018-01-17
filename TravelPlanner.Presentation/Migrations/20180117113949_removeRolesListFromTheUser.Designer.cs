@@ -11,8 +11,8 @@ using TravelPlanner.Persistence;
 namespace TravelPlanner.Presentation.Migrations
 {
     [DbContext(typeof(TravelPlannerContext))]
-    [Migration("20171224115711_firstmigration")]
-    partial class firstmigration
+    [Migration("20180117113949_removeRolesListFromTheUser")]
+    partial class removeRolesListFromTheUser
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -46,9 +46,15 @@ namespace TravelPlanner.Presentation.Migrations
 
                     b.Property<string>("Picture");
 
+                    b.Property<string>("Role");
+
                     b.Property<string>("SecurityStamp");
 
+                    b.Property<string>("UserRoleId");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserRoleId");
 
                     b.ToTable("Users");
                 });
@@ -92,26 +98,22 @@ namespace TravelPlanner.Presentation.Migrations
 
                     b.Property<string>("NormalizedName");
 
-                    b.Property<string>("TravelUserId");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("TravelUserId");
-
                     b.ToTable("Roles");
+                });
+
+            modelBuilder.Entity("TravelPlanner.Shared.Entities.TravelUser", b =>
+                {
+                    b.HasOne("TravelPlanner.Shared.Entities.UserRole")
+                        .WithMany("TravelUsers")
+                        .HasForeignKey("UserRoleId");
                 });
 
             modelBuilder.Entity("TravelPlanner.Shared.Entities.Trip", b =>
                 {
                     b.HasOne("TravelPlanner.Shared.Entities.TravelUser", "TravelUser")
                         .WithMany("Trips")
-                        .HasForeignKey("TravelUserId");
-                });
-
-            modelBuilder.Entity("TravelPlanner.Shared.Entities.UserRole", b =>
-                {
-                    b.HasOne("TravelPlanner.Shared.Entities.TravelUser")
-                        .WithMany("Roles")
                         .HasForeignKey("TravelUserId");
                 });
 #pragma warning restore 612, 618

@@ -8,6 +8,7 @@ using TravelPlanner.Shared.Entities;
 using TravelPlanner.QueryServices.Users;
 using TravelPlanner.CommandsServices.Users;
 using TravelPlanner.Shared.Enums;
+using TravelPlanner.QueryServices.Roles;
 
 namespace TravelPlanner.Presentation.IdentityCustomeStores
 {
@@ -20,9 +21,12 @@ namespace TravelPlanner.Presentation.IdentityCustomeStores
     {
         private readonly IUsersReadService _usersReadService;
         private readonly IUsersWriteService _usersWriteService;
+        private readonly IRolesReadService _rolesReadService;
 
-        public TravelUserStore(IUsersReadService usersReadService, IUsersWriteService usersWriteService)
+        public TravelUserStore(IUsersReadService usersReadService, IUsersWriteService usersWriteService,
+            IRolesReadService rolesReadService)
         {
+            _rolesReadService = rolesReadService;
             _usersReadService = usersReadService;
             _usersWriteService = usersWriteService;
         }
@@ -81,11 +85,7 @@ namespace TravelPlanner.Presentation.IdentityCustomeStores
 
         public Task<IList<string>> GetRolesAsync(TravelUser user, CancellationToken cancellationToken)
         {
-            IList<string> roles = new List<string>();
-            foreach (var role in user.Roles)
-            {
-                roles.Add(role.Name);
-            }
+            IList<string> roles = new List<string>() { user.Role };
             return Task.FromResult(roles);
         }
 
@@ -116,18 +116,14 @@ namespace TravelPlanner.Presentation.IdentityCustomeStores
 
         public Task<bool> IsInRoleAsync(TravelUser user, string roleName, CancellationToken cancellationToken)
         {
-            bool isInRole = false;
-            foreach (var role in user.Roles)
-            {
-                if (role.Name.ToLower() == roleName.ToLower())
-                    isInRole = true;
-            }
-            return Task.FromResult(isInRole);
+            return Task.FromResult(user.Role == roleName);
         }
 
-        public Task RemoveFromRoleAsync(TravelUser user, string roleName, CancellationToken cancellationToken)
+        public async Task RemoveFromRoleAsync(TravelUser user, string roleName, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var roleResponse = await _rolesReadService.GetRoleByName(roleName);
+            if(user.Role == roleResponse.Role.Name)
+                user.Role = null;
         }
         public Task<IList<UserLoginInfo>> GetLoginsAsync(TravelUser user, CancellationToken cancellationToken)
         {
@@ -142,9 +138,10 @@ namespace TravelPlanner.Presentation.IdentityCustomeStores
             throw new NotImplementedException();
         }
 
-        public Task AddToRoleAsync(TravelUser user, string roleName, CancellationToken cancellationToken)
+        public async Task AddToRoleAsync(TravelUser user, string roleName, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var roleResponse = await _rolesReadService.GetRoleByName(roleName);
+            user.Role = roleResponse.Role.Name;
         }
         public Task RemoveLoginAsync(TravelUser user, string loginProvider, string providerKey, CancellationToken cancellationToken)
         {

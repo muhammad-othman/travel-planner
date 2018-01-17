@@ -35,12 +35,12 @@ namespace TravelPlanner.Persistence.Repos
 
         public ICollection<TravelUser> GetAllUsers()
         {
-            return _context.Users.Include(e=>e.Roles).ToList();
+            return _context.Users.ToList();
         }
 
         public TravelUser GetUserByEmail(string email)
         {
-            return _context.Users.Where(e => e.Email.ToLower() == email.ToLower()).Include(e => e.Roles).FirstOrDefault();
+            return _context.Users.Where(e => e.Email.ToLower() == email.ToLower()).FirstOrDefault();
         }
 
         public TravelUser GetUserById(string userId)
@@ -53,7 +53,6 @@ namespace TravelPlanner.Persistence.Repos
             var oldEntity = _context.Users.Find(user.Id);
             if (oldEntity == null)
                 return null;
-            
             _context.Entry(oldEntity).CurrentValues.SetValues(user);
             _context.SaveChanges();
             return user;
