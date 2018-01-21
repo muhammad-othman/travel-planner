@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TravelPlanner.QueryServices.Users.Queries;
 using TravelPlanner.Shared.Entities;
+using System.Linq.Expressions;
 
 namespace TravelPlanner.QueryServices.Users
 {
@@ -28,6 +29,12 @@ namespace TravelPlanner.QueryServices.Users
         public async Task<MultipleUsersQueryResponse> GetAllUsersAsync(TravelUser currentUser, string email, int? pageIndex, int? pageSize)
         {
             var query = new GetAllUsersQuery(currentUser,email,pageIndex, pageSize);
+            return await _mediator.Send(query);
+        }
+
+        public async Task<SingleUserQueryResponse> GetUserBy(Expression<Func<TravelUser, bool>> expression)
+        {
+            var query = new GetUserByQuery(expression);
             return await _mediator.Send(query);
         }
     }

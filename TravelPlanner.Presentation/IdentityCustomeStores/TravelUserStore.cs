@@ -85,7 +85,7 @@ namespace TravelPlanner.Presentation.IdentityCustomeStores
 
         public Task<IList<string>> GetRolesAsync(TravelUser user, CancellationToken cancellationToken)
         {
-            IList<string> roles = new List<string>() { user.Role };
+            IList<string> roles = new List<string>() { user.Role ?? "user" };
             return Task.FromResult(roles);
         }
 
@@ -127,15 +127,31 @@ namespace TravelPlanner.Presentation.IdentityCustomeStores
         }
         public Task<IList<UserLoginInfo>> GetLoginsAsync(TravelUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var logins = user.Logins.Select(login => 
+                new UserLoginInfo(login.LoginProvider, login.ProviderKey, login.ProviderDisplayName));
+
+            return Task.FromResult<IList<UserLoginInfo>>(logins.ToList());
         }
-        public Task<TravelUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
+        public async Task<TravelUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var result =  await _usersReadService.GetUserBy(
+                u => u.Logins.Where(
+                    e => e.ProviderKey == providerKey && e.LoginProvider == loginProvider
+                    ).FirstOrDefault() != null);
+
+            return result.User;
+
         }
         public Task AddLoginAsync(TravelUser user, UserLoginInfo login, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.Run(() => 
+            user.Logins.Add(
+                new TravelUserLoginInfo
+                {
+                    LoginProvider = login.LoginProvider,
+                    ProviderDisplayName = login.ProviderDisplayName,
+                    ProviderKey = login.ProviderKey
+                }));
         }
 
         public async Task AddToRoleAsync(TravelUser user, string roleName, CancellationToken cancellationToken)
@@ -145,7 +161,10 @@ namespace TravelPlanner.Presentation.IdentityCustomeStores
         }
         public Task RemoveLoginAsync(TravelUser user, string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.Run(() =>
+            user.Logins.Remove(
+                user.Logins.Where(e=>e.ProviderKey == providerKey && e.LoginProvider == loginProvider).FirstOrDefault()
+                    ));
         }
 
         public Task SetNormalizedUserNameAsync(TravelUser user, string normalizedName, CancellationToken cancellationToken)

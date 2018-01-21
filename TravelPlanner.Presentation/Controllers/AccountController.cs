@@ -161,10 +161,10 @@ namespace TravelPlanner.Presentation.Controllers
                 string picture = await GetPictureUrlAsync(info);
                 
                 user = new TravelUser { NormalizedEmail = email, Email = email, Picture = picture, EmailConfirmed = true };
-                user.CreationDate = DateTime.Now;
                 var createdUser = await _userManager.CreateAsync(user);
 
             }
+            user.SecurityStamp = DateTime.Now.ToString();
             var signinResult = await _userManager.AddLoginAsync(user, info);
             if (signinResult.Succeeded)
                 await _signInManager.SignInAsync(user, isPersistent: false);

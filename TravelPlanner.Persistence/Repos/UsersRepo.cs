@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using TravelPlanner.Shared.Entities;
 using TravelPlanner.Shared.IRepos;
+using System.Linq.Expressions;
 
 namespace TravelPlanner.Persistence.Repos
 {
@@ -36,6 +37,11 @@ namespace TravelPlanner.Persistence.Repos
         public ICollection<TravelUser> GetAllUsers()
         {
             return _context.Users.ToList();
+        }
+
+        public TravelUser GetUserBy(Expression<Func<TravelUser, bool>> expression)
+        {
+            return _context.Users.Where(expression).FirstOrDefault();
         }
 
         public TravelUser GetUserByEmail(string email)

@@ -11,9 +11,10 @@ using TravelPlanner.Persistence;
 namespace TravelPlanner.Presentation.Migrations
 {
     [DbContext(typeof(TravelPlannerContext))]
-    partial class TravelPlannerContextModelSnapshot : ModelSnapshot
+    [Migration("20180121130046_addlogininfo")]
+    partial class addlogininfo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

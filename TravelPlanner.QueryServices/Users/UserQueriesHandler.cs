@@ -16,7 +16,9 @@ namespace TravelPlanner.QueryServices.Users
     public class UserQueriesHandler : BaseHandler,
         IRequestHandler<GetAllUsersQuery, MultipleUsersQueryResponse>,
         IRequestHandler<GetUserByEmailQuery, SingleUserQueryResponse>,
-        IRequestHandler<GetUserByIdQuery, SingleUserQueryResponse>
+        IRequestHandler<GetUserByIdQuery, SingleUserQueryResponse>,
+        IRequestHandler<GetUserByQuery, SingleUserQueryResponse>
+        
     {
         private readonly IUsersReadRepo _repo;
 
@@ -49,6 +51,14 @@ namespace TravelPlanner.QueryServices.Users
         public Task<SingleUserQueryResponse> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
         {
             TravelUser user = _repo.GetUserById(request.UserId);
+            var response = new SingleUserQueryResponse(user);
+            response.Status = GetResponseStatus(user);
+            return Task.FromResult(response);
+        }
+
+        public Task<SingleUserQueryResponse> Handle(GetUserByQuery request, CancellationToken cancellationToken)
+        {
+            TravelUser user = _repo.GetUserBy(request.Expression);
             var response = new SingleUserQueryResponse(user);
             response.Status = GetResponseStatus(user);
             return Task.FromResult(response);
